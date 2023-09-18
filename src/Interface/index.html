@@ -12,14 +12,46 @@
             *{
                 font-family: "LolaMono";
             }
-            body{
-                background-color: black;
-                color: white;
-            }
         </style>
         <script src="./Bundle.js"></script>
     </head>
     <body>
-        
+        <header>
+            <div id="TabContainer">
+                <div class="Tab Active">Welcome</div>
+                <div class="Tab">Editor</div>
+                <div class="Tab">Console</div>
+                <div class="Tab">Interpreter</div>
+                <div class="Tab">Memory Viewer</div>
+                <div class="Tab">Statistics</div>
+                <div class="Tab">Settings</div>
+            </div>
+        </header>
+        <main>
+            <div id="Welcome">
+                <div style="height: 100%; max-width: 800px; margin: auto; padding: 30px;">
+                    <h1 style="text-align: center;">Sigma16 IDE and Interpreter</h1>
+                    <p>
+                        This is the new Sigma16 IDE and Interpreter rewritten for better performance and usability.
+                        Its core is now written in WebAssembly to maximise performance. It is free to use, and open-source.
+                    </p>
+                    <h2>How to use</h2>
+                    <p>
+                        The page is organised into multiple tabs. The editor tab is used to write the Sigma16 source code.
+                        The Interpreter tab is used to compile and run the program. The memory tab is used to look into the
+                        memory of the running program. More information is available in the documentation.
+                    </p>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <a href="javascript:delete this">More information</a>
+            <a href="javascript:delete this">Documentation</a>
+            <a href="javascript:delete this">Examples</a>
+            <a href="javascript:delete this">Source Code</a>
+        </footer>
+        <div style="display: none" id="Tabs">
+            
+        </div>
     </body>
 </html>

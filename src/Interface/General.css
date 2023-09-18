@@ -1,0 +1,19 @@
+html, body{
+  height: 100%;
+}
+body{
+  background-color: black;
+  color: white;
+  margin: 0;
+}
+
+a:link,
+a:visited{
+  color: rgb(0, 107, 200);
+}
+a:hover {
+  color: rgb(14, 126, 224);
+}
+a:active {
+  color: rgb(25, 146, 251);
+}

@@ -6,6 +6,7 @@
     "fs": "^0.0.1-security",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "path": "^0.12.7",
+    "split-grid": "^1.0.11",
     "style-loader": "^3.3.3",
     "wabt": "^1.0.32",
     "webpack": "^5.88.2",
