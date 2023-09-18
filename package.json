@@ -1,0 +1,36 @@
+{
+  "dependencies": {
+    "css-loader": "^6.8.1",
+    "express": "^4.18.2",
+    "file-loader": "^6.2.0",
+    "fs": "^0.0.1-security",
+    "monaco-editor-webpack-plugin": "^7.1.0",
+    "path": "^0.12.7",
+    "style-loader": "^3.3.3",
+    "wabt": "^1.0.32",
+    "webpack": "^5.88.2",
+    "webpack-merge": "^5.9.0"
+  },
+  "name": "s16-interpreter",
+  "version": "1.0.0",
+  "description": "An interpreter for the Sigma16 fantasy assembly language written in WebAssembly.",
+  "main": "index.js",
+  "scripts": {
+    "build-dev": "npx webpack --config webpack.dev.js",
+    "build-prod": "npx webpack --config webpack.prod.js",
+    "server": "start node Server.mjs && npx webpack --config webpack.dev.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Permille/S16-Interpreter.git"
+  },
+  "author": "Permille.io",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Permille/S16-Interpreter/issues"
+  },
+  "homepage": "https://github.com/Permille/S16-Interpreter#readme",
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  }
+}
