@@ -1,0 +1,15 @@
+#EditorTab{
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+#EditorTab > .ButtonsWrapper{
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: auto;
+}
+#EditorTab > .Editor{
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+}

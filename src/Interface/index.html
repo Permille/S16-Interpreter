@@ -18,17 +18,17 @@
     <body>
         <header>
             <div id="TabContainer">
-                <div class="Tab Active">Welcome</div>
-                <div class="Tab">Editor</div>
-                <div class="Tab">Console</div>
-                <div class="Tab">Interpreter</div>
-                <div class="Tab">Memory Viewer</div>
-                <div class="Tab">Statistics</div>
-                <div class="Tab">Settings</div>
+                <div class="Tab Active" id="WelcomeTabButton">Welcome</div>
+                <div class="Tab" id="EditorTabButton">Editor</div>
+                <div class="Tab" id="ConsoleTabButton">Console</div>
+                <div class="Tab" id="InterpreterTabButton">Interpreter</div>
+                <div class="Tab" id="MemoryViewerTabButton">Memory Viewer</div>
+                <div class="Tab" id="StatisticsTabButton">Statistics</div>
+                <div class="Tab" id="SettingsTabButton">Settings</div>
             </div>
         </header>
         <main>
-            <div id="Welcome">
+            <div id="WelcomeTab">
                 <div style="height: 100%; max-width: 800px; margin: auto; padding: 30px;">
                     <h1 style="text-align: center;">Sigma16 IDE and Interpreter</h1>
                     <p>
@@ -38,6 +38,7 @@
                     <h2>How to use</h2>
                     <p>
                         The page is organised into multiple tabs. The editor tab is used to write the Sigma16 source code.
+                        To open a file, drag and drop it into the editor. To save a file, press Ctrl + S.
                         The Interpreter tab is used to compile and run the program. The memory tab is used to look into the
                         memory of the running program. More information is available in the documentation.
                     </p>
@@ -50,8 +51,18 @@
             <a href="javascript:delete this">Examples</a>
             <a href="javascript:delete this">Source Code</a>
         </footer>
-        <div style="display: none" id="Tabs">
-            
+        <div style="display: none" id="UnusedTabs">
+            <div id="EditorTab">
+                <div class="ButtonsWrapper"></div>
+                <div class="Editor">
+
+                </div>
+            </div>
+            <div id="ConsoleTab"></div>
+            <div id="InterpreterTab"></div>
+            <div id="MemoryViewerTab"></div>
+            <div id="StatisticsTab"></div>
+            <div id="SettingsTab"></div>
         </div>
     </body>
 </html>

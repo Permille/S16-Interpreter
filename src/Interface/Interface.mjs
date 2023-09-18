@@ -3,36 +3,25 @@ import "./Main.css";
 import "./Header.css";
 import "./Scrollbars.css";
 import "./General.css";
-import * as Monaco from "monaco-editor/esm/vs/editor/editor.api.js";
-import Split from "split-grid";
+import WelcomeTab from "./Tabs/WelcomeTab.mjs";
+import EditorTab from "./Tabs/EditorTab.mjs";
+import ConsoleTab from "./Tabs/ConsoleTab.mjs";
+import InterpreterTab from "./Tabs/InterpreterTab.mjs";
+import MemoryViewerTab from "./Tabs/MemoryViewerTab.mjs";
+import StatisticsTab from "./Tabs/StatisticsTab.mjs";
+import SettingsTab from "./Tabs/SettingsTab.mjs";
 
-window.onload = function(){
-  return;
-  Split({
-    "snapOffset": 100,
-    "columnGutters": [
-      {
-        "track": 1,
-        "element": document.getElementById("GutterColumn1")
-      }
-    ],
-    "rowGutters": [
-      {
-        "track": 1,
-        "element": document.getElementById("GutterRow1")
-      }
-    ]
-  });
-  return;
-  const MonacoContainer = document.createElement("div");
-  MonacoContainer.style.height = "300px";
-  document.body.append(MonacoContainer);
-  Monaco.editor.create(MonacoContainer, {
-    "value": "console.log(\"hi\");",
-    "theme": "vs-dark",
-    "language": "javascript",
-    "automaticLayout": true,
-    "fontSize": 18
-  });
-  
+export default class Interface{
+  constructor(){
+    this.Tabs = new Map([
+      ["Welcome", new WelcomeTab(document.getElementById("WelcomeTabButton"), document.getElementById("WelcomeTab"))],
+      ["Editor", new EditorTab(document.getElementById("EditorTabButton"), document.getElementById("EditorTab"))],
+      ["Console", new ConsoleTab(document.getElementById("ConsoleTabButton"), document.getElementById("ConsoleTab"))],
+      ["Interpreter", new InterpreterTab(document.getElementById("InterpreterTabButton"), document.getElementById("InterpreterTab"))],
+      ["MemoryViewer", new MemoryViewerTab(document.getElementById("MemoryViewerTabButton"), document.getElementById("MemoryViewerTab"))],
+      ["Statistics", new StatisticsTab(document.getElementById("StatisticsTabButton"), document.getElementById("StatisticsTab"))],
+      ["Settings", new SettingsTab(document.getElementById("SettingsTabButton"), document.getElementById("SettingsTab"))]
+    ]);
+    this.Tabs.get("Welcome").Show();
+  }
 };
