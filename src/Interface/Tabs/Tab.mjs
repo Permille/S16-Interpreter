@@ -2,6 +2,7 @@ export default class Tab{
   constructor(Button, Body){
     this.Button = Button;
     this.Body = Body;
+    this.Events = new EventTarget;
 
     this.Button.addEventListener("click", this.Show.bind(this));
   }

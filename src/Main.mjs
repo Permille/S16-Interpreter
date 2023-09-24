@@ -1,16 +1,18 @@
 import "./Interface/Interface.mjs";
-import WasmBinary from "./Main.wat";
 import Interface from "./Interface/Interface.mjs";
-const WasmModule = new WebAssembly.Module(WasmBinary);
-const Memory = new WebAssembly.Memory({"initial": 0, "maximum": 0});
-const WasmInstance = new WebAssembly.Instance(WasmModule, {
-  "Main": {
-    "Memory": Memory
+import Interpreter from "./Interpreter/Interpreter.mjs";
+import DeferredPromise from "./DeferredPromise.mjs";
+
+class Main{
+  static{
+    window.onload = function(){
+      window.LoadedPromise = new DeferredPromise;
+      window.Main = new Main;
+    };
   }
-});
-
-
-window.onload = function(){
-  new Interface;
-};
-
+  constructor(){
+    this.Interface = new Interface;
+    this.Interpreter = new Interpreter;
+    window.LoadedPromise.resolve();
+  }
+}
