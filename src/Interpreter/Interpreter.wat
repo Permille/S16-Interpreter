@@ -142,11 +142,7 @@
     i32.mul
     local.tee $p
     i32.const 32767
-    i32.gt_s
-    local.get $p
-    i32.const -32768
-    i32.lt_s
-    i32.or
+    i32.gt_u
     i32.const 5 ;; Bit for `ccv` (signed overflow)
     i32.shl
     i32.const 15 ;; Control register R15
@@ -191,32 +187,24 @@
     local.get $a
     i32.const 15
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $msba
 
     ;; 6
     local.get $b
     i32.const 15
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $msbb
 
     ;; 7
-    local.get $sum
+    local.get $primary
     i32.const 15
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $msbsum
 
     ;; 8
     local.get $sum
     i32.const 16
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $carryOut
 
     ;; 10
@@ -286,12 +274,10 @@
     (param $RegisterB i32)
     (local $a i32)
     (local $b i32)
-    (local $sum i32)
     (local $primary i32)
     (local $msba i32)
     (local $msbb i32)
     (local $msbsum i32)
-    (local $carryOut i32)
     (local $tcOverflow i32)
     ;; 1, 3
     local.get $RegisterA
@@ -303,13 +289,8 @@
     call $GetRegister
     local.tee $b
 
-    ;; 3, 4, 5
-    i32.const 65535
-    i32.xor
-    i32.add
-    i32.const 1
-    i32.add
-    local.tee $sum
+
+    i32.sub
 
     ;; 5
     i32.const 0xffff
@@ -320,33 +301,19 @@
     local.get $a
     i32.const 15
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $msba
 
     ;; 7
     local.get $b
     i32.const 15
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $msbb
 
     ;; 8
-    local.get $sum
+    local.get $primary
     i32.const 15
     i32.shr_u
-    i32.const 1
-    i32.and
     local.set $msbsum
-
-    ;; 9
-    local.get $sum
-    i32.const 16
-    i32.shr_u
-    i32.const 1
-    i32.and
-    local.set $carryOut
 
     ;; 11
     local.get $msba
@@ -368,7 +335,9 @@
     local.set $tcOverflow
 
     ;; 16
-    local.get $carryOut
+    local.get $a
+    local.get $b
+    i32.ge_u
     i32.const 192 ;; bit_ccV | bit_ccC
     i32.mul
     local.get $tcOverflow
@@ -380,11 +349,7 @@
     i32.const 2 ;; ccE
     i32.shl
     i32.or
-    local.get $sum
-    i32.const 0
-    i32.ne
-    i32.const 1 ;; ccG
-    i32.shl
+    i32.const 2 ;; ccG
     i32.or
     local.get $msbsum
     local.get $tcOverflow
@@ -403,7 +368,7 @@
     ;; 17
     i32.const 15 ;; Select R15
     call $SetRegister
-
+    
     ;; 18
     local.get $primary
     local.get $Destination
