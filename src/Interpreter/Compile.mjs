@@ -7,7 +7,7 @@ class InstructionType{
 const RRR = new InstructionType(x => x + 1, new Map([
   ["RR", function(Opcode, Argument){
     const Match = /^R(\d+),R(\d+)$/.exec(Argument);
-    if(Match === null) throw new Error(`RR instruction wasn't formatted properly.`);
+    if(Match === null) throw new Error(`RR-format instruction wasn't formatted properly.`);
     const Registers = [];
     for(let i = 1; i < 3; ++i){
       if(Match[i] !== 0 && /^0+\d/.test(Match[i])) throw new Error(`Leading zeros in register IDs are not allowed.`);
@@ -19,7 +19,7 @@ const RRR = new InstructionType(x => x + 1, new Map([
   }],
   ["RRR", function(Opcode, Argument){
     const Match = /^R(\d+),R(\d+),R(\d+)$/.exec(Argument);
-    if(Match === null) throw new Error(`RRR instruction wasn't formatted properly.`);
+    if(Match === null) throw new Error(`RRR-format instruction wasn't formatted properly.`);
     const Registers = [];
     for(let i = 1; i < 4; ++i){
       if(Match[i] !== 0 && /^0+\d/.test(Match[i])) throw new Error(`Leading zeros in register IDs are not allowed.`);
@@ -31,15 +31,41 @@ const RRR = new InstructionType(x => x + 1, new Map([
   }]
 ]));
 
+function ResolveImmediateValue(Decimal, Hexadecimal, Label, LabelToWordOffset){
+  let ImmediateOffset;
+  if(Decimal !== undefined) ImmediateOffset = Number.parseInt(Decimal);
+  else if(Hexadecimal !== undefined) Number.parseInt(Hexadecimal.substring(1), 16);
+  else if(Label !== undefined){
+    if(!LabelToWordOffset.has(Label)) throw new Error(`Unknown label "${Label}".`);
+    ImmediateOffset = LabelToWordOffset.get(Label);
+  }
+  if(ImmediateOffset < -32768 || ImmediateOffset > 65535) ImmediateOffset = 0;
+  ImmediateOffset &= 65535;
+  return ImmediateOffset;
+}
+
 const RX = new InstructionType(x => x + 2, new Map([
   ["RRX", function(Opcode, Argument, LabelToWordOffset){
-
+    const Match = /^R(\d+),((-?\d+)|(\$[0-9a-f])|([a-zA-Z][a-z_A-Z0-9]*))(\[R(\d+)\])?$/.exec(Argument);
+    if(Match === null) throw new Error(`RRX-format instruction wasn't formatted properly.`);
+    const DestinationRegisterID = Number.parseInt(Match[1]);
+    const OffsetRegisterID = Number.parseInt(Match[7] || "0");
+    const ImmediateOffset = ResolveImmediateValue(Match[3], Match[4], Match[5], LabelToWordOffset);
+    return [0xf << 12 | DestinationRegisterID << 8 | OffsetRegisterID << 4 | Opcode, ImmediateOffset];
   }],
   ["KRX", function(Opcode, Argument, LabelToWordOffset){
-
+    const Match = /^((-?\d+)|(\$[0-9a-f])|([a-zA-Z][a-z_A-Z0-9]*)),((-?\d+)|(\$[0-9a-f])|([a-zA-Z][a-z_A-Z0-9]*))(\[R(\d+)\])?$/.exec(Argument);
+    if(Match === null) throw new Error(`KRX-format instruction wasn't formatted properly.`);
+    const SelectedBit = ResolveImmediateValue(Match[2], Match[3], Match[4], LabelToWordOffset);
+    const OffsetRegisterID = Number.parseInt(Match[10] || "0");
+    const ImmediateOffset = ResolveImmediateValue(Match[6], Match[7], Match[8], LabelToWordOffset);
+    return [0xf << 12 | SelectedBit << 8 | OffsetRegisterID << 4 | Opcode, ImmediateOffset];
   }],
   ["X", function(Opcode, Argument, LabelToWordOffset){
-
+    const Match = /^((-?\d+)|(\$[0-9a-f])|([a-zA-Z][a-z_A-Z0-9]*))$/.exec(Argument);
+    if(Match === null) throw new Error(`X-format instruction wasn't formatted properly.`);
+    const ImmediateOffset = ResolveImmediateValue(Match[2], Match[3], Match[4], LabelToWordOffset);
+    return [0xf << 12 | Opcode, ImmediateOffset];
   }]
 ]));
 
@@ -64,7 +90,7 @@ const Instructions = new Map([
   ["jumpc0", [RX, RX.AfmtParsers.get("KRX").bind(null, 4)]],
   ["jumpc1", [RX, RX.AfmtParsers.get("KRX").bind(null, 5)]],
   ["jal", [RX, RX.AfmtParsers.get("RRX").bind(null, 6)]],
-  ["tstset", [RX, RX.AfmtParsers.get("RRX").bind(null, 7)]]
+  ["tstset", [RX, RX.AfmtParsers.get("RRX").bind(null, 11)]]
 ]);
 
 export default function Compile(Text, MemoryArray){
