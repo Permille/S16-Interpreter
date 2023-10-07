@@ -18,10 +18,11 @@ Handlers.Compile = function(Event){
   const Text = Event.data.Message;
   try{
     Compile(Text, new Uint16Array(Memory.buffer, Offset, 65536));
-  } catch(error){
+  } catch({message}){
     return self.postMessage({
       "ID": Event.data.ID,
-      "Failed": true
+      "Failed": true,
+      "ErrorMessage": message
     });
   }
   self.postMessage({
