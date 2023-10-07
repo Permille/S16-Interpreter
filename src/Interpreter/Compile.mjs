@@ -18,8 +18,7 @@ class RRR{
     this.ParameterB = ParameterB;
     this.BinaryWordSize = 1;
   }
-  EmitBinary(WordOffset, LabelToWordOffset, Memory){
-    const MemoryArray = new Uint16Array(Memory.buffer);
+  EmitBinary(WordOffset, LabelToWordOffset, MemoryArray){
     MemoryArray[WordOffset] = this.Opcode << 12 | this.Destination << 8 | this.ParameterA << 4 | this.ParameterB;
   }
 }
@@ -66,7 +65,7 @@ const Handlers = new Map([
   ["trap", Afmt_RRR]
 ]);
 
-export default function Compile(Text, Memory){
+export default function Compile(Text, MemoryArray){
   const Rows = Text.split(/\r?\n/);
   const LabelToWordOffset = new Map;
   const Instructions = [];
@@ -89,7 +88,7 @@ export default function Compile(Text, Memory){
   }
   
   for(let i = 0, WordOffset = 0, Length = Instructions.length; i < Length; ++i){
-    Instructions[i].EmitBinary(WordOffset, LabelToWordOffset, Memory);
+    Instructions[i].EmitBinary(WordOffset, LabelToWordOffset, MemoryArray);
     WordOffset += Instructions[i].BinaryWordSize;
   }
 };

@@ -1,33 +1,31 @@
 (module
-  (import "Main" "Memory" (memory 2))
-  ;;(import "Main" "GetRegister" (func $GetRegister (param i32) (result i32)))
-  ;;(import "Main" "SetRegister" (func $SetRegister (param i32) (param i32)))
+  (import "Main" "Memory" (memory 3 3))
   (global $InstructionAddress (export "InstructionAddress") (mut i32) (i32.const 0))
   (global $ErrorState (export "ErrorState") (mut i32) (i32.const 0))
   (global $InstructionsExecuted (export "InstructionsExecuted") (mut i32) (i32.const 0))
-  (func $GetRegister (param $RegisterID i32) (result i32)
-    local.get $RegisterID
-    i32.eqz
-    if
-      i32.const 0
-      return
-    end
+  
+  (func $GetRegister (export "GetRegister") (param $RegisterID i32) (result i32)
+    ;;local.get $RegisterID
+    ;;i32.eqz
+    ;;if i32.const 0 return end
+    i32.const 0
+    i32.const 0
+    i32.store16 offset=1024
+    
     local.get $RegisterID
     i32.const 1
     i32.shl
-    i32.load16_u offset=131040
+    i32.load16_u offset=1024
   )
-  (func $SetRegister (param $Value i32) (param $RegisterID i32)
+  (func $SetRegister (export "SetRegister") (param $Value i32) (param $RegisterID i32)
     local.get $RegisterID
     i32.eqz
-    if
-      return
-    end
+    if return end
     local.get $RegisterID
     i32.const 1
     i32.shl
     local.get $Value
-    i32.store16 offset=131040
+    i32.store16 offset=1024
   )
   (func (export "Reset")
     (local $i i32)
@@ -60,25 +58,24 @@
     (local $Instruction i32)
     loop $MainLoop
       global.get $InstructionAddress
-      i32.load16_u
+      i32.load8_u offset=65537
 
       local.tee $Instruction
-      i32.const 12
+      i32.const 4
       i32.shr_u
       local.set $Code
 
       local.get $Instruction
-      i32.const 8
-      i32.shr_u
       i32.const 15
       i32.and
       local.set $d
 
-      local.get $Instruction
+      global.get $InstructionAddress
+      i32.load8_u offset=65536
+
+      local.tee $Instruction
       i32.const 4
       i32.shr_u
-      i32.const 15
-      i32.and
       local.set $a
 
       local.get $Instruction
@@ -188,11 +185,15 @@
     local.get $RegisterB
     call $GetRegister
     i32.mul
-    local.tee $p
-    i32.const 32767
-    i32.gt_u
-    i32.const 5 ;; Bit for `ccv` (signed overflow)
-    i32.shl
+    local.set $p
+    
+    i32.const 32
+    i32.const 0
+    local.get $p
+    i32.const 0xffff8000
+    i32.and
+    select
+
     i32.const 15 ;; Control register R15
     call $SetRegister
     local.get $p

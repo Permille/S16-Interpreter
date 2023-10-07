@@ -1,23 +1,23 @@
 import Compile from "./Compile.mjs";
 import InterpreterBinary from "./Interpreter.wat";
-import GetRegisterBinary from "./Registers.wat";
 
 
-const Memory = new WebAssembly.Memory({"initial": 2, "maximum": 2});
-const RegistersInstance = new WebAssembly.Instance(new WebAssembly.Module(GetRegisterBinary));
+const Memory = new WebAssembly.Memory({"initial": 3, "maximum": 3});
 const InterpreterInstance = new WebAssembly.Instance(new WebAssembly.Module(InterpreterBinary), {
   "Main": {
-    "Memory": Memory,
-    "GetRegister": RegistersInstance.exports.GetRegister,
-    "SetRegister": RegistersInstance.exports.SetRegister
+    "Memory": Memory
   }
 });
+//InterpreterInstance.exports.Initialise();
+//const Memory = InterpreterInstance.exports.memory;
+//const Offset = 131072;
+const Offset = 65536;
 const Handlers = {};
 
 Handlers.Compile = function(Event){
   const Text = Event.data.Message;
   try{
-    Compile(Text, Memory);
+    Compile(Text, new Uint16Array(Memory.buffer, Offset, 65536));
   } catch(error){
     return self.postMessage({
       "ID": Event.data.ID,
@@ -47,7 +47,7 @@ Handlers.Reset = function(Event){
 Handlers.GetRegisters = function(Event){
   const RegisterArray = new Uint16Array(16);
   for(let i = 0; i < 16; ++i){
-    RegisterArray[i] = RegistersInstance.exports.GetRegister(i);
+    RegisterArray[i] = InterpreterInstance.exports.GetRegister(i);
   }
   self.postMessage({
     "ID": Event.data.ID,

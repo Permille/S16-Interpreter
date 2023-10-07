@@ -84,8 +84,9 @@ module.exports = function(RawContents, Map, Meta){
       
       const BinaryenModule = Binaryen.readBinary(new Uint8Array(Module.toBinary({}).buffer));
       Binaryen.setOptimizeLevel(3);
-      Binaryen.setLowMemoryUnused(false);
-      Binaryen.setAlwaysInlineMaxSize(256);
+      Binaryen.setLowMemoryUnused(true);
+      Binaryen.setAlwaysInlineMaxSize(512);
+
       BinaryenModule.optimize();
       const OptimisedBuffer = BinaryenModule.emitBinary();
       callback(null, "export default new Uint8Array([" + OptimisedBuffer + "]).buffer;", Map, Meta);
