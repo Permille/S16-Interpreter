@@ -30,11 +30,13 @@ Handlers.Compile = function(Event){
 };
 
 Handlers.Run = function(Event){
+  console.time();
   const Iterations = Event.data.Message;
   InterpreterInstance.exports.Run(Iterations);
   self.postMessage({
     "ID": Event.data.ID
   });
+  console.timeEnd();
 };
 Handlers.Reset = function(Event){
   InterpreterInstance.exports.Reset();

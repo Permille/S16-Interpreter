@@ -60,7 +60,8 @@ function ProcessUnrolls(Code){
 
 module.exports = function(RawContents, Map, Meta){
   const callback = this.async();
-  require("wabt")().then(function(wabt){
+  void async function(){
+    const wabt = await require("wabt")();
     let [Contents, Dependencies] = ProcessIncludes(RawContents, this.context);
     for(const AbsolutePath of Dependencies) this.addDependency(AbsolutePath);
     try{
@@ -79,10 +80,17 @@ module.exports = function(RawContents, Map, Meta){
         "multi_value": true,
         "bulk_memory": true
       });
-      const Buffer = Module.toBinary({}).buffer;
-      callback(null, "export default new Uint8Array([" + Buffer + "]).buffer;", Map, Meta);
+      const Binaryen = (await import("binaryen")).default;
+      
+      const BinaryenModule = Binaryen.readBinary(new Uint8Array(Module.toBinary({}).buffer));
+      Binaryen.setOptimizeLevel(3);
+      Binaryen.setLowMemoryUnused(false);
+      Binaryen.setAlwaysInlineMaxSize(256);
+      BinaryenModule.optimize();
+      const OptimisedBuffer = BinaryenModule.emitBinary();
+      callback(null, "export default new Uint8Array([" + OptimisedBuffer + "]).buffer;", Map, Meta);
     } catch(e){
       callback(null, "Error while compiling wat: " + e, Map, Meta);
     }
-  }.bind(this));
+  }.bind(this)();
 };

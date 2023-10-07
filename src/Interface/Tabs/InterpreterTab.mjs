@@ -11,7 +11,7 @@ export default class InterpreterTab extends Tab{
       await window.Main.Interpreter.Reset();
     }.bind(this));
     this.Body.querySelector(".RunButton").addEventListener("click", async function(){
-      await window.Main.Interpreter.Run(1);
+      await window.Main.Interpreter.Run(134217728);
     }.bind(this));
 
     this.RegisterValueElements = [];

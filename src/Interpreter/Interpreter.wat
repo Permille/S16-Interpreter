@@ -1,10 +1,34 @@
 (module
-  (import "Main" "Memory" (memory 0 65535))
-  (import "Main" "GetRegister" (func $GetRegister (param i32) (result i32)))
-  (import "Main" "SetRegister" (func $SetRegister (param i32) (param i32)))
+  (import "Main" "Memory" (memory 2))
+  ;;(import "Main" "GetRegister" (func $GetRegister (param i32) (result i32)))
+  ;;(import "Main" "SetRegister" (func $SetRegister (param i32) (param i32)))
   (global $InstructionAddress (export "InstructionAddress") (mut i32) (i32.const 0))
   (global $ErrorState (export "ErrorState") (mut i32) (i32.const 0))
   (global $InstructionsExecuted (export "InstructionsExecuted") (mut i32) (i32.const 0))
+  (func $GetRegister (param $RegisterID i32) (result i32)
+    local.get $RegisterID
+    i32.eqz
+    if
+      i32.const 0
+      return
+    end
+    local.get $RegisterID
+    i32.const 1
+    i32.shl
+    i32.load16_u offset=131040
+  )
+  (func $SetRegister (param $Value i32) (param $RegisterID i32)
+    local.get $RegisterID
+    i32.eqz
+    if
+      return
+    end
+    local.get $RegisterID
+    i32.const 1
+    i32.shl
+    local.get $Value
+    i32.store16 offset=131040
+  )
   (func (export "Reset")
     (local $i i32)
     i32.const 0
@@ -140,10 +164,10 @@
       end
 
       ;; Increments the instruction address, this will need to be replaced later.
-      global.get $InstructionAddress
-      i32.const 2
-      i32.add
-      global.set $InstructionAddress
+      ;;global.get $InstructionAddress
+      ;;i32.const 2
+      ;;i32.add
+      ;;global.set $InstructionAddress
 
 
       local.get $MaxIterations
