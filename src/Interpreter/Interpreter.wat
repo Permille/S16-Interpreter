@@ -56,6 +56,7 @@
     (local $d i32)
     (local $Code i32)
     (local $Instruction i32)
+    (local $SecondWord i32)
     loop $MainLoop
       global.get $InstructionAddress
       i32.load8_u offset=65537
@@ -83,89 +84,172 @@
       i32.and
       local.set $b
 
-      block $BreakSwitch
-        block block block block block block block block block block block block block block block block
-          local.get $Code
+      global.get $InstructionAddress
+      i32.const 2 ;;This is in bytes, so it increments by 1 word
+      i32.add
+      global.set $InstructionAddress
+
+      block $Exit block block block block block block block block block block block block block block block block
+        local.get $Code
+        br_table 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+      end
+        ;; add
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:add
+        br $Exit
+      end
+        ;; sub
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:sub
+        br $Exit
+      end
+        ;; mul
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:mul
+        br $Exit
+      end
+        ;; div
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:div
+        br $Exit
+      end
+        ;; cmp
+        local.get $a
+        local.get $b
+        call $I:cmp
+        br $Exit
+      end
+        ;; addc
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:addc
+        br $Exit
+      end
+        ;; muln
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:muln
+        br $Exit
+      end
+        ;; divn
+        local.get $d
+        local.get $a
+        local.get $b
+        call $I:divn
+        br $Exit
+      end
+        nop ;; no-op (0x8)
+        br $Exit
+      end
+        nop ;; no-op (0x9)
+        br $Exit
+      end
+        nop ;; no-op (0xa)
+        br $Exit
+      end
+        nop ;; no-op (0xb)
+        br $Exit
+      end
+        unreachable ;; trap
+      end
+        nop ;; no-op (0xd)
+        br $Exit
+      end
+        unreachable ;; EXP (0xe)
+      end
+        ;; RX (0xf)
+        global.get $InstructionAddress
+        i32.load16_u offset=65536 ;;TODO: Handle case when InstructionAddress is out of bounds
+        local.set $SecondWord
+
+        global.get $InstructionAddress
+        i32.const 2 ;;This is in bytes, so it increments by 1 word
+        i32.add
+        global.set $InstructionAddress
+        block block block block block block block block block block block block block block block block block
+          local.get $b
           br_table 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
         end
-          ;; add
+          ;; lea (0xf__0)
           local.get $d
           local.get $a
-          local.get $b
-          call $I:add
-          br $BreakSwitch
+          local.get $SecondWord
+          call $I:lea
+          br $Exit
         end
-          ;; sub
+          ;; load (0xf__1)
           local.get $d
           local.get $a
-          local.get $b
-          call $I:sub
-          br $BreakSwitch
+          local.get $SecondWord
+          call $I:load
+          br $Exit
         end
-          ;; mul
+          ;; store (0xf__2)
           local.get $d
           local.get $a
-          local.get $b
-          call $I:mul
-          br $BreakSwitch
+          local.get $SecondWord
+          call $I:store
+          br $Exit
         end
-          ;; div
+          ;; jump (0xf__3)
+          local.get $d
+          local.get $SecondWord
+          call $I:jump
+          br $Exit
+        end
+          ;; jumpc0 (0xf__4)
           local.get $d
           local.get $a
-          local.get $b
-          call $I:div
-          br $BreakSwitch
+          local.get $SecondWord
+          call $I:jumpc0
+          br $Exit
         end
-          ;; cmp
-          local.get $a
-          local.get $b
-          call $I:cmp
-          br $BreakSwitch
-        end
-          ;; addc
+          ;; jumpc1 (0xf__5)
           local.get $d
           local.get $a
-          local.get $b
-          call $I:addc
-          br $BreakSwitch
+          local.get $SecondWord
+          call $I:jumpc1
+          br $Exit
         end
-          ;; muln
+          ;; jal (0xf__6)
           local.get $d
           local.get $a
-          local.get $b
-          call $I:muln
-          br $BreakSwitch
+          local.get $SecondWord
+          call $I:jal
+          br $Exit
         end
-          ;; divn
-          local.get $d
-          local.get $a
-          local.get $b
-          call $I:divn
-          br $BreakSwitch
+          unreachable ;; no-op (0xf__7)
         end
-          unreachable ;; no-op (0x8)
+          unreachable ;; no-op (0xf__8)
         end
-          unreachable ;; no-op (0x9)
+          unreachable ;; no-op (0xf__9)
         end
-          unreachable ;; no-op (0xa)
+          unreachable ;; no-op (0xf__a)
         end
-          unreachable ;; no-op (0xb)
+          ;; tstset (0xf__b)
+          ;; The original implementation doesn't work, so it's effectively a no-op.
+          nop
+          br $Exit
         end
-          unreachable ;; trap
+          unreachable ;; no-op (0xf__c)
         end
-          unreachable ;; no-op (0xd)
+          unreachable ;; no-op (0xf__d)
         end
-          unreachable ;; EXP (0xe)
+          unreachable ;; no-op (0xf__e)
         end
-        unreachable ;; RX (0xf)
-      end
-
-      ;; Increments the instruction address, this will need to be replaced later.
-      ;;global.get $InstructionAddress
-      ;;i32.const 2
-      ;;i32.add
-      ;;global.set $InstructionAddress
-
+          unreachable ;; no-op (0xf__f)
+        end
+      end ;; Exit
 
       local.get $MaxIterations
       i32.const 1
@@ -175,6 +259,114 @@
     end
   )
   ;; Instruction implementations
+  (func $I:lea
+    (param $Destination i32)
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    local.get $Parameter
+    call $GetRegister
+    local.get $ImmediateOffset
+    i32.add
+    local.get $Destination
+    call $SetRegister
+  )
+  (func $I:load
+    (param $Destination i32)
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    local.get $Parameter
+    call $GetRegister
+    local.get $ImmediateOffset
+    i32.add
+    i32.const 65535
+    i32.and
+    i32.const 1
+    i32.shl
+    i32.load16_u offset=65536
+    local.get $Destination
+    call $SetRegister
+  )
+  (func $I:store
+    (param $Destination i32)
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    local.get $Parameter
+    call $GetRegister
+    local.get $ImmediateOffset
+    i32.add
+    i32.const 65535
+    i32.and
+    i32.const 1
+    i32.shl
+    local.get $Destination
+    call $GetRegister
+    i32.store16 offset=65536
+  )
+  (func $I:jump
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    local.get $Parameter
+    call $GetRegister
+    local.get $ImmediateOffset
+    i32.add
+    i32.const 1
+    i32.shl
+    global.set $InstructionAddress
+  )
+  (func $I:jumpc0
+    (param $Bit i32)
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    i32.const 15
+    call $GetRegister
+    local.get $Bit
+    i32.shr_u
+    i32.const 1
+    i32.and
+    if return end
+    local.get $Parameter
+    call $GetRegister
+    local.get $ImmediateOffset
+    i32.add
+    i32.const 1
+    i32.shl
+    global.set $InstructionAddress
+  )
+  (func $I:jumpc1
+    (param $Bit i32)
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    i32.const 15
+    call $GetRegister
+    local.get $Bit
+    i32.shr_u
+    i32.const 1
+    i32.and
+    if
+      local.get $Parameter
+      call $GetRegister
+      local.get $ImmediateOffset
+      i32.add
+      i32.const 1
+      i32.shl
+      global.set $InstructionAddress
+    end
+  )
+  (func $I:jal
+    (param $Destination i32)
+    (param $Parameter i32)
+    (param $ImmediateOffset i32)
+    local.get $Parameter
+    call $GetRegister
+    global.get $InstructionAddress
+    local.get $Destination
+    call $SetRegister
+    local.get $ImmediateOffset
+    i32.add
+    i32.const 1
+    i32.shl
+    global.set $InstructionAddress
+  )
   (func $I:mul
     (param $Destination i32)
     (param $RegisterA i32)
