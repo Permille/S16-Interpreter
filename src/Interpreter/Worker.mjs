@@ -31,13 +31,12 @@ Handlers.Compile = function(Event){
 };
 
 Handlers.Run = function(Event){
-  console.time();
   const Iterations = Event.data.Message;
-  InterpreterInstance.exports.Run(Iterations);
+  const Code = InterpreterInstance.exports.Run(Iterations);
   self.postMessage({
-    "ID": Event.data.ID
+    "ID": Event.data.ID,
+    "Code": Code
   });
-  console.timeEnd();
 };
 Handlers.Reset = function(Event){
   InterpreterInstance.exports.Reset();

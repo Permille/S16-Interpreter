@@ -11,8 +11,17 @@ export default class InterpreterTab extends Tab{
       await window.Main.Interpreter.Reset();
     }.bind(this));
     this.Body.querySelector(".RunButton").addEventListener("click", async function(){
-      await window.Main.Interpreter.Run(134217728);
+      await window.Main.Interpreter.Run(16777216);
     }.bind(this));
+    
+    void async function Load(){
+      await window.LoadedPromise;
+      window.Main.Interpreter.Events.addEventListener("Yield", function(){
+        window.Main.Interpreter.Run(16777216);
+      });
+      window.Main.Interpreter.Events.addEventListener("Stop", console.log.bind(null, "Stopped"));
+      window.Main.Interpreter.Events.addEventListener("Breakpoint", console.log.bind(null, "Reached Breakpoint"));
+    }.call(this);
 
     this.RegisterValueElements = [];
     const RegistersWrapperElement = this.Body.querySelector(".RegistersList");
@@ -42,6 +51,6 @@ export default class InterpreterTab extends Tab{
       const Response = await window.Main.Interpreter.MessageWorker("GetRegisters");
       for(let i = 0; i < 16; ++i) this.RegisterValueElements[i].innerText = Response.data.Registers[i];
       window.setTimeout(Load.bind(this), 20);
-    }.bind(this)();
+    }.call(this);
   }
 };

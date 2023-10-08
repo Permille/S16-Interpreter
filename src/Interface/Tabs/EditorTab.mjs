@@ -7,7 +7,12 @@ export default class EditorTab extends Tab{
   constructor(Button, Body){
     super(Button, Body);
     this.Editor = Monaco.editor.create(this.Body.querySelector(".Editor"), {
-      "value": " mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1\n mul R1,R1,R1",
+      "value": `
+      lea R1,123[R2]
+      add R2,R1,R2
+      add R3,R1,R2
+      jump 2
+      `,
       "theme": "vs-dark",
       //"language": "javascript",
       "automaticLayout": true,

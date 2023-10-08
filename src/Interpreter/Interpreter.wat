@@ -50,7 +50,7 @@
       br_if 0
     end
   )
-  (func (export "Run") (param $MaxIterations i32)
+  (func (export "Run") (param $MaxIterations i32) (result i32)
     (local $b i32)
     (local $a i32)
     (local $d i32)
@@ -160,7 +160,33 @@
         nop ;; no-op (0xb)
         br $Exit
       end
-        unreachable ;; trap
+        ;; trap
+        block block block block block block block
+          local.get $d
+          call $GetRegister
+          br_table 0 1 2 3 4 5
+        end
+          ;; 0: Stop execution
+          i32.const 1
+          return
+        end
+          ;; 1: Read
+          unreachable
+        end
+          ;; 2: Write
+          unreachable
+        end
+          ;; 3: Blocking read, not implemented, nop
+          nop
+          br $Exit
+        end
+          ;; 4: Breakpoint
+          i32.const 2
+          return
+        end
+          ;; Do nothing
+          nop
+        end
       end
         nop ;; no-op (0xd)
         br $Exit
@@ -228,26 +254,42 @@
           call $I:jal
           br $Exit
         end
-          unreachable ;; no-op (0xf__7)
+          ;; no-op (0xf__7)
+          nop
+          br $Exit
         end
-          unreachable ;; no-op (0xf__8)
+          ;; no-op (0xf__8)
+          nop
+          br $Exit
         end
-          unreachable ;; no-op (0xf__9)
+          ;; no-op (0xf__9)
+          nop
+          br $Exit
         end
-          unreachable ;; no-op (0xf__a)
+          ;; no-op (0xf__a)
+          nop
+          br $Exit
         end
           ;; tstset (0xf__b)
           ;; The original implementation doesn't work, so it's effectively a no-op.
           nop
           br $Exit
         end
-          unreachable ;; no-op (0xf__c)
+          ;; no-op (0xf__c)
+          nop
+          br $Exit
         end
-          unreachable ;; no-op (0xf__d)
+          ;; no-op (0xf__d)
+          nop
+          br $Exit
         end
-          unreachable ;; no-op (0xf__e)
+          ;; no-op (0xf__e)
+          nop
+          br $Exit
         end
-          unreachable ;; no-op (0xf__f)
+          ;; no-op (0xf__f)
+          nop
+          br $Exit
         end
       end ;; Exit
 
@@ -257,6 +299,7 @@
       local.tee $MaxIterations
       br_if $MainLoop
     end
+    i32.const 0
   )
   ;; Instruction implementations
   (func $I:lea

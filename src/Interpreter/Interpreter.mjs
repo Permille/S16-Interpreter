@@ -1,6 +1,7 @@
 import DeferredPromise from "../DeferredPromise.mjs";
 export default class Interpreter{
   constructor(){
+    this.Events = new EventTarget;
     this.RequestID = 0;
     this.Requests = new Map;
     this.Worker = null;
@@ -39,6 +40,25 @@ export default class Interpreter{
   }
   async Run(Iterations){
     const Result = await this.MessageWorker("Run", Iterations);
+    switch(Result.data.Code){
+      case 0:{
+        //Yielded (finished executing the amount of iterations specified)
+        this.Events.dispatchEvent(new CustomEvent("Yield"));
+        break;
+      }
+      case 1:{
+        //Stopped
+        this.Events.dispatchEvent(new CustomEvent("Stop"));
+        break;
+      }
+      case 2:{
+        //Breakpoint
+        this.Events.dispatchEvent(new CustomEvent("Breakpoint"));
+      }
+      default:{
+        throw new Error("Unknown result code from interpreter: " + Result.data.Code);
+      }
+    }
   }
   async Reset(){
     const Result = await this.MessageWorker("Reset");
