@@ -55,18 +55,19 @@
     (local $a i32)
     (local $d i32)
     (local $Code i32)
-    (local $Instruction i32)
+    (local $FirstByte i32)
+    (local $SecondByte i32)
     (local $SecondWord i32)
     loop $MainLoop
       global.get $InstructionAddress
       i32.load8_u offset=65537
 
-      local.tee $Instruction
+      local.tee $SecondByte
       i32.const 4
       i32.shr_u
       local.set $Code
 
-      local.get $Instruction
+      local.get $SecondByte
       i32.const 15
       i32.and
       local.set $d
@@ -74,12 +75,12 @@
       global.get $InstructionAddress
       i32.load8_u offset=65536
 
-      local.tee $Instruction
+      local.tee $FirstByte
       i32.const 4
       i32.shr_u
       local.set $a
 
-      local.get $Instruction
+      local.get $FirstByte
       i32.const 15
       i32.and
       local.set $b
@@ -191,7 +192,103 @@
         nop ;; no-op (0xd)
         br $Exit
       end
-        unreachable ;; EXP (0xe)
+        ;; EXP (0xe)
+        global.get $InstructionAddress
+        i32.load16_u offset=65536 ;;TODO: Handle case when InstructionAddress is out of bounds
+        local.set $SecondWord
+
+        global.get $InstructionAddress
+        i32.const 2 ;;This is in bytes, so it increments by 1 word
+        i32.add
+        global.set $InstructionAddress
+        block block block block block block block
+        block block block block block block block
+        block block block block block block block
+        block block block block block block block
+          local.get $FirstByte
+          br_table 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+        end
+          ;;0x00 brf
+          br $Exit
+        end
+          ;;0x01 brb
+          br $Exit
+        end
+          ;;0x02 brfc0
+          br $Exit
+        end
+          ;;0x03 brbc0
+          br $Exit
+        end
+          ;;0x04 brfc1
+          br $Exit
+        end
+          ;;0x05 brbc1
+          br $Exit
+        end
+          ;;0x06 brfz
+          br $Exit
+        end
+          ;;0x07 brbz
+          br $Exit
+        end
+          ;;0x08 brfbz
+          br $Exit
+        end
+          ;;0x09 brbnz
+          br $Exit
+        end
+          ;;0x0a dsptch
+          br $Exit
+        end
+          ;;0x0b save
+          br $Exit
+        end
+          ;;0x0c restor
+          br $Exit
+        end
+          ;;0x0d push
+          br $Exit
+        end
+          ;;0x0e pop
+          br $Exit
+        end
+          ;;0x0f top
+          br $Exit
+        end
+          ;;0x10 shiftl
+          br $Exit
+        end
+          ;;0x11 shiftr
+          br $Exit
+        end
+          ;;0x12 logicw
+          br $Exit
+        end
+          ;;0x13 logicb
+          br $Exit
+        end
+          ;;0x14 logicc
+          br $Exit
+        end
+          ;;0x15 extrc
+          br $Exit
+        end
+          ;;0x16 extrci
+          br $Exit
+        end
+          ;;0x17 getctl
+          br $Exit
+        end
+          ;;0x18 putctl
+          br $Exit
+        end
+          ;;0x19 resume
+          br $Exit
+        end
+          ;;>=0x1a noop
+          br $Exit
+        end
       end
         ;; RX (0xf)
         global.get $InstructionAddress
@@ -948,5 +1045,387 @@
 
     i32.const 15
     call $SetRegister
+  )
+  (func $I:brf
+    (param $Offset i32)
+    global.get $InstructionAddress
+    local.get $Offset
+    i32.const 1
+    i32.shl ;;The instruction address is in bytes, not in words
+    i32.add
+    i32.const 131070
+    i32.and
+    global.set $InstructionAddress
+  )
+  (func $I:brb
+    (param $Offset i32)
+    global.get $InstructionAddress
+    local.get $Offset
+    i32.const 1
+    i32.shl ;;The instruction address is in bytes, not in words
+    i32.sub
+    i32.const 131070
+    i32.and
+    global.set $InstructionAddress
+  )
+  (func $I:brfc0
+    (param $Register i32)
+    (param $SecondWord i32)
+    (local $Bit i32)
+    (local $Offset i32)
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $Bit
+    local.get $SecondWord
+    i32.const 4095
+    i32.and
+    local.set $Offset
+
+    local.get $Register
+    call $GetRegister
+    local.get $Bit
+    i32.shl
+    i32.const 1
+    i32.and
+    i32.eqz
+    if
+      local.get $Offset
+      call $I:brf
+    end
+  )
+  (func $I:brfc1
+    (param $Register i32)
+    (param $SecondWord i32)
+    (local $Bit i32)
+    (local $Offset i32)
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $Bit
+    local.get $SecondWord
+    i32.const 4095
+    i32.and
+    local.set $Offset
+
+    local.get $Register
+    call $GetRegister
+    local.get $Bit
+    i32.shl
+    i32.const 1
+    i32.and
+    if
+      local.get $Offset
+      call $I:brf
+    end
+  )
+  (func $I:brbc0
+    (param $Register i32)
+    (param $SecondWord i32)
+    (local $Bit i32)
+    (local $Offset i32)
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $Bit
+    local.get $SecondWord
+    i32.const 4095
+    i32.and
+    local.set $Offset
+
+    local.get $Register
+    call $GetRegister
+    local.get $Bit
+    i32.shl
+    i32.const 1
+    i32.and
+    i32.eqz
+    if
+      local.get $Offset
+      call $I:brb
+    end
+  )
+  (func $I:brbc1
+    (param $Register i32)
+    (param $SecondWord i32)
+    (local $Bit i32)
+    (local $Offset i32)
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $Bit
+    local.get $SecondWord
+    i32.const 4095
+    i32.and
+    local.set $Offset
+
+    local.get $Register
+    call $GetRegister
+    local.get $Bit
+    i32.shl
+    i32.const 1
+    i32.and
+    if
+      local.get $Offset
+      call $I:brb
+    end
+  )
+  (func $I:brfz
+    (param $Register i32)
+    (param $Offset i32)
+    local.get $Register
+    i32.eqz
+    if
+      local.get $Offset
+      call $I:brf
+    end
+  )
+  (func $I:brbz
+    (param $Register i32)
+    (param $Offset i32)
+    local.get $Register
+    i32.eqz
+    if
+      local.get $Offset
+      call $I:brb
+    end
+  )
+  (func $I:brfnz
+    (param $Register i32)
+    (param $Offset i32)
+    local.get $Register
+    if
+      local.get $Offset
+      call $I:brf
+    end
+  )
+  (func $I:brbnz
+    (param $Register i32)
+    (param $Offset i32)
+    local.get $Register
+    if
+      local.get $Offset
+      call $I:brb
+    end
+  )
+  (func $I:dsptch
+    (param $Register i32)
+    (param $SecondWord i32)
+    (local $Bit i32)
+    (local $Offset i32)
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $Bit
+    local.get $SecondWord
+    i32.const 4095
+    i32.and
+    local.set $Offset
+
+    local.get $Register
+    call $GetRegister
+    i32.const 1
+    local.get $Bit
+    i32.shl
+    i32.const 1
+    i32.sub
+    i32.and
+    i32.const 1
+    i32.shl
+    local.get $Offset
+    i32.add
+    call $I:brf
+  )
+  (func $I:save
+    (param $StartRegister i32)
+    (param $SecondWord i32)
+    (local $EndRegister i32)
+    (local $Offset i32)
+    (local $CurrentRegister i32)
+    local.get $SecondWord
+    i32.const 255
+    i32.and
+    ;; Immediate offset
+
+    local.get $SecondWord
+    i32.const 8
+    i32.shr_u
+    i32.const 15
+    i32.and
+    ;; Offset register
+    call $GetRegister
+    i32.add
+    ;; Convert to byte offset
+    i32.const 1
+    i32.shl
+    local.set $Offset
+
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    ;;Don't need to AND because it's the last 4 bits
+    local.set $EndRegister
+    
+    local.get $StartRegister
+    local.set $CurrentRegister
+    loop
+      local.get $Offset
+      local.get $CurrentRegister
+      call $GetRegister
+      i32.store16 offset=65536
+
+      local.get $CurrentRegister
+      local.get $EndRegister
+      i32.ne
+
+
+      local.get $CurrentRegister
+      i32.const 1
+      i32.add
+      i32.const 15
+      i32.and
+      local.set $CurrentRegister
+
+      local.get $Offset
+      i32.const 2
+      i32.add
+      local.set $Offset
+
+      
+      br_if 0
+    end
+  )
+  (func $I:restor
+    (param $StartRegister i32)
+    (param $SecondWord i32)
+    (local $EndRegister i32)
+    (local $Offset i32)
+    (local $CurrentRegister i32)
+    local.get $SecondWord
+    i32.const 255
+    i32.and
+    ;; Immediate offset
+
+    local.get $SecondWord
+    i32.const 8
+    i32.shr_u
+    i32.const 15
+    i32.and
+    ;; Offset register
+    call $GetRegister
+    i32.add
+    ;; Convert to byte offset
+    i32.const 1
+    i32.shl
+    local.set $Offset
+
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    ;;Don't need to AND because it's the last 4 bits
+    local.set $EndRegister
+    
+    local.get $StartRegister
+    local.set $CurrentRegister
+    loop
+      local.get $Offset
+      i32.load16_u offset=65536
+      local.get $CurrentRegister
+      call $SetRegister
+
+      local.get $CurrentRegister
+      local.get $EndRegister
+      i32.ne
+
+
+      local.get $CurrentRegister
+      i32.const 1
+      i32.add
+      i32.const 15
+      i32.and
+      local.set $CurrentRegister
+
+      local.get $Offset
+      i32.const 2
+      i32.add
+      local.set $Offset
+
+      
+      br_if 0
+    end
+  )
+  (func $I:push
+    (param $RegisterD i32)
+    (param $SecondWord i32)
+    (local $RegisterE i32)
+    (local $RegisterF i32)
+    (local $Top i32)
+    (local $Limit i32)
+
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $RegisterE
+
+    local.get $SecondWord
+    i32.const 8
+    i32.shr_u
+    i32.const 15
+    i32.and
+    local.set $RegisterF
+
+    
+
+    local.get $RegisterE
+    call $GetRegister
+    local.set $Top
+
+    local.get $RegisterF
+    call $GetRegister
+    local.set $Limit
+
+    local.get $Top
+    local.get $Limit
+    i32.lt_u
+    if
+      i32.const 1
+      local.get $Top
+      i32.add
+      local.tee $Top
+      local.get $RegisterE
+      call $SetRegister
+      
+      local.get $Top
+      i32.const 1
+      i32.shl
+      local.get $RegisterD
+      call $GetRegister
+      i32.store offset=65536
+    else
+      i32.const 256
+      i32.const 15
+      call $SetRegister
+      unreachable ;;Also set the `req` status register's 2nd bit
+    end
+  )
+  (func $I:pop
+    (param $RegisterD i32)
+    (param $SecondWord i32)
+    (local $RegisterE i32)
+    (local $RegisterF i32)
+
+    local.get $SecondWord
+    i32.const 12
+    i32.shr_u
+    local.set $RegisterE
+
+    local.get $SecondWord
+    i32.const 8
+    i32.shr_u
+    i32.const 15
+    i32.and
+    local.set $RegisterF
+
+    unreachable
   )
 )

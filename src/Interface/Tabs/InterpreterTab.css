@@ -22,3 +22,41 @@
   margin: 0;
   text-align: center;
 }
+
+
+
+
+
+.MemoryView {
+  margin: auto;
+}
+.MemoryView > h1 {
+  text-align: center;
+}
+.MemoryView > .Content > div{
+  display: flex;
+  justify-content: center;
+}
+.MemoryView > .Content > div > p{
+  margin-block: 0;
+  margin-inline: 5px;
+  text-align: center;
+}
+.MemoryView > .Content > div > p + p{
+  cursor: pointer;
+}
+.MemoryView > .Content > div > p + p:hover{
+  outline: 2px solid rgb(53, 154, 255);
+  outline-offset: 1px;
+  filter: brightness(.85);
+}
+.MemoryView > .Content > div > p.Selected{
+  color: rgb(53, 154, 255);
+}
+.MemoryView > .Content > div > p:nth-child(4n + 1){
+  margin-right: 15px;
+}
+.MemoryView > .Content > div > p:first-child{
+  font-weight: bold;
+  color: #afafaf;
+}

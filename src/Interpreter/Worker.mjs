@@ -54,6 +54,19 @@ Handlers.GetRegisters = function(Event){
     "Registers": RegisterArray
   }, [RegisterArray.buffer]);
 };
+Handlers.GetMemoryArray = function(Event){
+  const Min = Event.data.Message.Min;
+  const Max = Event.data.Message.Max;
+  const MemoryArray = new Uint16Array(Max - Min);
+  const u16 = new Uint16Array(Memory.buffer, 65536);
+  for(let i = Min, Index = 0; i < Max; ++i){
+    MemoryArray[Index++] = u16[i];
+  }
+  self.postMessage({
+    "ID": Event.data.ID,
+    "MemoryArray": MemoryArray
+  }, [MemoryArray.buffer]);
+}
 
 self.onmessage = function(Event){
   Handlers[Event.data.Request](Event);

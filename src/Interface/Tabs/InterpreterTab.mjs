@@ -1,5 +1,6 @@
 import "./InterpreterTab.css";
 import Tab from "./Tab.mjs";
+import MemoryViewer from "../MemoryViewer.mjs";
 
 export default class InterpreterTab extends Tab{
   constructor(Button, Body){
@@ -40,12 +41,20 @@ export default class InterpreterTab extends Tab{
         this.RegisterValueElements.push(RegisterValueElement);
       }
     }
-
-    const MemoryViewWrapperElement = this.Body.querySelector(".MemoryView");
+    this.MemoryViewer = new MemoryViewer(this.Body.querySelector(".MemoryView"));
 
     
     this.ReceivedMemoryUpdate = false;
 
+    void async function Load(){
+      await window.LoadedPromise;
+      const Response = await window.Main.Interpreter.MessageWorker("GetMemoryArray", {
+        "Min": this.MemoryViewer.MemoryMin + 0,
+        "Max": this.MemoryViewer.MemoryMin + 160
+      });
+      this.MemoryViewer.UpdateMemory(Response.data.MemoryArray);
+      window.setTimeout(Load.bind(this), 20);
+    }.call(this);
     void async function Load(){
       await window.LoadedPromise;
       const Response = await window.Main.Interpreter.MessageWorker("GetRegisters");
