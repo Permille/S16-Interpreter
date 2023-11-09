@@ -70,8 +70,10 @@ const RX = new InstructionType(x => x + 2, new Map([
 ]));
 
 const EXP = new InstructionType(x => x + 2, new Map([
-
+  ["X", function(){throw new Error("not implemented")}]
 ]));
+
+
 
 const Instructions = new Map([
   ["add", [RRR, RRR.AfmtParsers.get("RRR").bind(null, 0)]],
@@ -90,8 +92,115 @@ const Instructions = new Map([
   ["jumpc0", [RX, RX.AfmtParsers.get("KRX").bind(null, 4)]],
   ["jumpc1", [RX, RX.AfmtParsers.get("KRX").bind(null, 5)]],
   ["jal", [RX, RX.AfmtParsers.get("RRX").bind(null, 6)]],
-  ["tstset", [RX, RX.AfmtParsers.get("RRX").bind(null, 11)]]
+  ["tstset", [RX, RX.AfmtParsers.get("RRX").bind(null, 11)]],
+  ["brf", [EXP, EXP.AfmtParsers.get("X").bind(null, 0)]],
+  ["brb", [EXP, EXP.AfmtParsers.get("X").bind(null, 1)]],
+  ["brfc0", [EXP, EXP.AfmtParsers.get("X").bind(null, 2)]],
+  ["brbc0", [EXP, EXP.AfmtParsers.get("X").bind(null, 3)]],
+  ["brfc1", [EXP, EXP.AfmtParsers.get("X").bind(null, 4)]],
+  ["brbc1", [EXP, EXP.AfmtParsers.get("X").bind(null, 5)]],
+  ["brfz", [EXP, EXP.AfmtParsers.get("X").bind(null, 6)]],
+  ["brbz", [EXP, EXP.AfmtParsers.get("X").bind(null, 7)]],
+  ["brfnz", [EXP, EXP.AfmtParsers.get("X").bind(null, 8)]],
+  ["brbnz", [EXP, EXP.AfmtParsers.get("X").bind(null, 9)]],
+  ["dsptch", [EXP, EXP.AfmtParsers.get("X").bind(null, 10)]],
+  ["save", [EXP, EXP.AfmtParsers.get("X").bind(null, 11)]],
+  ["restor", [EXP, EXP.AfmtParsers.get("X").bind(null, 12)]],
+  ["push", [EXP, EXP.AfmtParsers.get("X").bind(null, 13)]],
+  ["pop", [EXP, EXP.AfmtParsers.get("X").bind(null, 14)]],
+  ["top", [EXP, EXP.AfmtParsers.get("X").bind(null, 15)]],
+  ["shiftl", [EXP, EXP.AfmtParsers.get("X").bind(null, 16)]],
+  ["shiftr", [EXP, EXP.AfmtParsers.get("X").bind(null, 17)]],
+  ["logicw", [EXP, EXP.AfmtParsers.get("X").bind(null, 18)]],
+  ["logicb", [EXP, EXP.AfmtParsers.get("X").bind(null, 19)]],
+  ["logicc", [EXP, EXP.AfmtParsers.get("X").bind(null, 20)]],
+  ["extrc", [EXP, EXP.AfmtParsers.get("X").bind(null, 21)]],
+  ["extrci", [EXP, EXP.AfmtParsers.get("X").bind(null, 22)]],
+  ["getctl", [EXP, EXP.AfmtParsers.get("X").bind(null, 23)]],
+  ["putctl", [EXP, EXP.AfmtParsers.get("X").bind(null, 24)]],
+  ["resume", [EXP, EXP.AfmtParsers.get("X").bind(null, 25)]]
 ]);
+
+/*
+ brf 3
+0000 e000
+0001 0003
+ brb 3
+0002 e001
+0003 0003
+ brfc0 R1,3,213
+0004 e102
+0005 30d5
+ brbc0 R1,2,123
+0006 e103
+0007 207b
+ brfc1 R3,2,21342
+0008 e304
+0009 235e
+ brbc1 R2,6,34322
+000a e205
+000b 6612
+ brfz R11,123
+000c eb06
+000d 007b
+ brbz R11,12312
+000e eb07
+000f 3018
+ brfnz R9,121
+0010 e908
+0011 0079
+ brbnz R13,42424
+0012 ed09
+0013 a5b8
+ dsptch R2,5,0
+0014 e20a
+0015 5000
+ save R14,R2,20[R4]
+0016 ee0b
+0017 2414
+ restor R14,R2,20[R4]
+0018 ee0c
+0019 2414
+ push R1,R2,R3
+001a e10d
+001b 2300
+ pop R1,R2,R3
+001c e10e
+001d 2300
+ top R1,R2,R3
+001e e10f
+001f 2300
+ shiftl R1,R2,3
+0020 e110
+0021 2003
+ shiftr R3,R4,12
+0022 e311
+0023 400c
+ logicw R4,R2,R3,6
+0024 e412
+0025 2306
+ logicb R1,2,3,4,5
+0026 e113
+0027 2345
+ logicc R2,3,R4,5,6
+0028 e214
+0029 3456
+ extrc R1,2,3,R4,5
+002a e115
+002b 4235
+ extrci R1,2,3,R4,5
+002c e116
+002d 4235
+ getctl R4,status
+002e e017
+002f 4000
+ putctl R4,status
+0030 e018
+0031 4000
+ resume
+0032 e019
+0033 0000
+*/
 
 export default function Compile(Text, MemoryArray){
   const Rows = Text.split(/\r?\n/);
