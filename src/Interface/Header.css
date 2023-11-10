@@ -4,7 +4,7 @@
   justify-content: left;
   overflow-x: auto;
   
-  gap: 1px;
+  gap: 2px;
 }
 #TabContainer > .Tab{
   color: #afafaf;

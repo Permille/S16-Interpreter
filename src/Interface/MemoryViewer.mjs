@@ -14,6 +14,7 @@ export default class MemoryViewer{
     this.MemoryMax = this.Rows * this.Columns;
     this.MemorySegmentView = new Uint16Array(0);
 
+
     document.addEventListener("keydown", function(Event){
       if(Event.key !== "Escape") return;
       if(this.SelectedElement !== null){
@@ -21,7 +22,8 @@ export default class MemoryViewer{
         this.SelectedElement = null;
       }
     }.bind(this));
-    document.addEventListener("wheel", function(Event){
+    this.ContentElement.addEventListener("wheel", function(Event){
+      Event.preventDefault();
       this.MemoryMin = Math.max(0, this.MemoryMin + this.Columns * 4 * -Math.sign(Event.wheelDeltaY));
       for(let i = 0; i < this.Descriptors.length; ++i){
         this.Descriptors[i].innerText = "0x" + (this.MemoryMin + i * this.Columns * 4).toString(16).padStart(4, 0);
@@ -31,7 +33,7 @@ export default class MemoryViewer{
     }.bind(this));
 
     this.Resize();
-    window.addEventListener("resize", this.Resize.bind(this));
+    new ResizeObserver(this.Resize.bind(this)).observe(this.RootElement.parentElement);
   }
   SetRows(Rows){
     if(this.Rows === Rows) return;
@@ -41,7 +43,7 @@ export default class MemoryViewer{
   Resize(){
     this.MemoryMin = 0;
     this.MemoryMax = this.Rows * this.Columns;
-    const Width = window.innerWidth;
+    const Width = this.RootElement.parentElement.offsetWidth;
     const Columns = Math.min(4, Math.floor((Width - 100) / (41.25 * 4 + 10)));
     if(Columns === this.Columns) return;
     this.Columns = Columns;

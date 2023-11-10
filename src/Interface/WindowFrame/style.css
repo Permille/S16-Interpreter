@@ -1,0 +1,38 @@
+.WindowWrapper{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    padding: 8px;
+    box-sizing: border-box;
+    outline: 1px solid black;
+    outline-offset: -8px;
+}
+.WindowWrapper > div{
+    backdrop-filter: blur(3px);
+}
+.WindowWrapper .TitleBar{
+    background-color: #b8b8b8af;
+    border-bottom: 1px solid black;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+.WindowWrapper .TitleText{
+    color: #ffffff;
+    margin-inline: 8px auto;
+    font-size: 16px;
+    padding: 2px;
+}
+.WindowWrapper .TitleBar > img{
+    height: 32px;
+    display: inline-block;
+}
+.WindowWrapper .TitleBar > img:hover{
+    backdrop-filter: brightness(.8);
+}
+.WindowWrapper .Body{
+    background-color: #0000007f;
+    overflow: auto;
+    position: relative;
+}
