@@ -60,3 +60,31 @@
   font-weight: bold;
   color: #afafaf;
 }
+
+#InterpreterButtonsWrapper{
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-block: 5px;
+  gap: 5px;
+}
+#InterpreterButtonsWrapper div{
+  text-align: center;
+  
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+
+  padding: 5px;
+  width: 100px;
+
+  background-color: #2f2f2f;
+  border: 2px solid #3f3f3f;
+}
+
+#InterpreterTab > h1{
+  margin-block: 7px;
+  text-align: center;
+}

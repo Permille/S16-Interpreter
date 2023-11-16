@@ -5,21 +5,40 @@ import MemoryViewer from "../MemoryViewer.mjs";
 export default class InterpreterTab extends Tab{
   constructor(Button, Body){
     super(Button, Body);
-    this.Body.querySelector(".CompileButton").addEventListener("click", function(){
+    this.IsRunning = false;
+    this.CompileButton = this.Body.querySelector(".CompileButton");
+    this.ResetButton = this.Body.querySelector(".ResetButton");
+    this.RunButton = this.Body.querySelector(".RunButton");
+    this.StepButton = this.Body.querySelector(".StepButton");
+    this.CompileButton.addEventListener("click", function(){
       window.Main.Interpreter.Compile(window.Main.Interface.Tabs.get("Editor").GetText());
     }.bind(this));
-    this.Body.querySelector(".ResetButton").addEventListener("click", async function(){
+    this.ResetButton.addEventListener("click", async function(){
       await window.Main.Interpreter.Reset();
     }.bind(this));
-    this.Body.querySelector(".RunButton").addEventListener("click", async function(){
-      await window.Main.Interpreter.Run(16777216);
+    this.RunButton.addEventListener("click", async function(){
+      if(!this.IsRunning){
+        this.IsRunning = true;
+        this.RunButton.innerText = "Stop";
+        await window.Main.Interpreter.Run(1000000);
+      } else{
+        this.IsRunning = false;
+        this.RunButton.innerText = "Run";
+      }
+    }.bind(this));
+    this.StepButton.addEventListener("click", async function(){
+      await window.Main.Interpreter.Run(1);
     }.bind(this));
     
     void async function Load(){
       await window.LoadedPromise;
       window.Main.Interpreter.Events.addEventListener("Yield", function(){
-        window.Main.Interpreter.Run(16777216);
-      });
+        if(this.IsRunning) window.Main.Interpreter.Run(1000000);
+      }.bind(this));
+      window.Main.Interpreter.Events.addEventListener("Error", function(){
+        this.IsRunning = false;
+        this.RunButton.innerText = "Run";
+      }.bind(this));
       window.Main.Interpreter.Events.addEventListener("Stop", console.log.bind(null, "Stopped"));
       window.Main.Interpreter.Events.addEventListener("Breakpoint", console.log.bind(null, "Reached Breakpoint"));
     }.call(this);

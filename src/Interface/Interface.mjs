@@ -3,6 +3,7 @@ import "./Main.css";
 import "./Header.css";
 import "./Scrollbars.css";
 import "./General.css";
+import "./ErrorMessage.css";
 import WelcomeTab from "./Tabs/WelcomeTab.mjs";
 import EditorTab from "./Tabs/EditorTab.mjs";
 import ConsoleTab from "./Tabs/ConsoleTab.mjs";
@@ -23,5 +24,31 @@ export default class Interface{
       ["Settings", new SettingsTab(document.getElementById("SettingsTabButton"), document.getElementById("SettingsTab"))]
     ]);
     this.Tabs.get("Welcome").Show();
+
+    this.Initialise();
+  }
+  async Initialise(){
+    await window.LoadedPromise;
+    window.Main.Interpreter.Events.addEventListener("Error", function(Event){
+      console.log(Event);
+      const Element = document.createElement("div");
+      Element.innerText = Event.detail;
+      Element.classList.add("ErrorMessage");
+      Element.style.bottom = "-200px";
+      window.setTimeout(function(){
+        Element.style.transition = "bottom 1s cubic-bezier(0, 0.65, 0.47, 0.96)";
+        window.setTimeout(function(){
+          Element.style.bottom = "20px";
+        }, 100);
+      }, 50);
+      document.body.append(Element);
+      window.setTimeout(function(){
+        Element.style.transition = "bottom 1s cubic-bezier(0.42, 0, 1, 0.26)";
+        Element.style.bottom = "-200px";
+        window.setTimeout(function(){
+          Element.remove();
+        }, 1500);
+      }, 3000);
+    }.bind(this));
   }
 };

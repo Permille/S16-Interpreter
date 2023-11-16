@@ -21,6 +21,9 @@ export default class Interpreter{
 
       this.Requests.delete(ID);
     }.bind(this);
+    this.Worker.onerror = function(Event){
+      this.Events.dispatchEvent(new CustomEvent("Error", {"detail": "Internal error: \n" + Event.message}));
+    }.bind(this);
   }
   TerminateWorker(){
     this.Requests.forEach(Handler => Handler.reject());
@@ -36,7 +39,12 @@ export default class Interpreter{
     return ResponsePromise;
   }
   async Compile(Text){
-    const Result = await this.MessageWorker("Compile", Text);
+    try{
+      const Result = await this.MessageWorker("Compile", Text);
+    }
+    catch(Error){
+      this.Events.dispatchEvent(new CustomEvent("Error", {"detail": "Internal error: \n" + Error.data.ErrorMessage}));
+    }
   }
   async Run(Iterations){
     const Result = await this.MessageWorker("Run", Iterations);

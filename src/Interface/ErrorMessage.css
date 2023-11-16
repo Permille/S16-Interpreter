@@ -1,0 +1,11 @@
+.ErrorMessage{
+  position: fixed;
+  right: 20px;
+  background: #8f0000bf;
+  color: #ffffff;
+  width: 200px;
+  height: 100px;
+  font-size: 14px;
+  padding: 10px;
+  backdrop-filter: blur(2px);
+}

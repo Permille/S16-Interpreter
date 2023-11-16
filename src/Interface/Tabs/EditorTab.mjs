@@ -3,6 +3,130 @@ import Tab from "./Tab.mjs";
 import * as Monaco from "monaco-editor/esm/vs/editor/editor.api.js";
 import Split from "split-grid";
 
+const InstructionDocs = new Map([
+  ["add", [
+    "`add`: Add",
+    "Adds the values of two registers.",
+    "Syntax: `add Rd,Ra,Rb`"
+  ]],
+  ["sub", [
+    "`sub`: Subtract",
+    "Subtracts the values of two registers.",
+    "Syntax: `sub Rd,Ra,Rb`"
+  ]],
+  ["mul", [
+    "`mul`: Multiply",
+    "Multiplies the values of two registers.",
+    "Syntax: `mul Rd,Ra,Rb`"
+  ]],
+  ["div", [
+    "`div`: Unsigned division",
+    "Performs unsigned division of the values of two registers and sets the result to Rd. Also calculates the remainder of the division and sets the result to R15.",
+    "Syntax: `div Rd,Ra,Rb`"
+  ]],
+  ["cmp", [
+    "`cmp`: Compare",
+    "Compares the values of two registers and stores the result in R15.",
+    "Syntax: `cmp Ra,Rb`"
+  ]],
+  ["addc", [
+    "`addc`: Add Carry",
+    "Adds the values of two registers and the carry bit of R15.",
+    "Syntax: `addc Rd,Ra,Rb`"
+  ]],
+  ["muln", [
+    "`muln`: Augmented Multiplication",
+    "Multiplies the values of two registers. Sets the lower 16 bits to Rd, and the higher 16 bits to R15.",
+    "Syntax: `muln Rd,Ra,Rb`"
+  ]],
+  ["divn", [
+    "`div`: Extended Division",
+    "Performs the division of a 32-bit number by a 16-bit quotient. See the docs for more information.",
+    "Syntax: `divn Rd,Ra,Rb`"
+  ]],
+  ["trap", [
+    "`trap`: Trap",
+    [
+      "Performs a special operation determined by the value stored in memory at address Rd. See the docs for more information on this. The other two registers are ignored.",
+      "The most common use is to halt execution of the program, which is code 0. This can be done with `trap R0,R0,R0`."
+    ].join("\n\n"),
+    "Syntax: `divn Rd,Ra,Rb`"
+  ]],
+  ["lea", [
+    "`lea`: Load Effective Address",
+    [
+      "Sets Rd to the effective address of the instruction.",
+      "The most common use is to load a compile-time constant value into the destination register."
+    ].join("\n\n"),
+    "Syntax: `lea Rd,Offset[Ra]`"
+  ]],
+  ["load", [
+    "`load`: Load",
+    "Loads a value from memory at the effective address and sets the value to Rd.",
+    "Syntax: `load Rd,Offset[Ra]`"
+  ]],
+  ["store", [
+    "`store`: Store",
+    "Stores the value of Rd to the memory at the effective address.",
+    "Syntax: `store Rd,Offset[Ra]`"
+  ]],
+  ["jump", [
+    "`jump`: Jump",
+    "Performs an unconditional jump to the effective address.",
+    "Syntax: `jump Offset[Ra]`"
+  ]],
+  ["jumpc0", [
+    "`jumpc0`: Jump Conditionally if Zero",
+    "Jumps to the effective address only if the provided bit of R15 is set to zero.",
+    "Syntax: `lea Bit,Offset[Ra]`"
+  ]],
+  ["jumpc1", [
+    "`jumpc1`: Jump Conditionally if One",
+    "Jumps to the effective address only if the provided bit of R15 is set to one.",
+    "Syntax: `lea Bit,Offset[Ra]`"
+  ]],
+  ["jal", [
+    "`jal`: Jump And Link",
+    "Sets Rd to the current value of the program counter, and then performs an unconditional jump to the effective address.",
+    "Syntax: `jal Rd,Offset[Ra]`"
+  ]],
+  ["tstset", [
+    "`tstset`: Test Set",
+    "Does nothing.",
+    "Syntax: `tstset Rd,Offset[Ra]`"
+  ]],
+]);
+
+// Register a new language
+Monaco.languages.register({ id: "Sigma16" });
+
+// Register a tokens provider for the language
+Monaco.languages.setMonarchTokensProvider("Sigma16", {
+	tokenizer: {
+		root: [
+      [/^[a-zA-Z]+/, "Label"],
+			[/ +[a-z]+/, "Instruction"],
+			[/R((0[0-9]+)|([1-9][0-9][0-9]+)|(1[6-9])|([2-9][0-9]))/, "BadRegister"],
+			[/R((1[0-5]?)|[02-9])/, "Register"],
+			[/[\[\]]/, "Bracket"],
+			[/-?(0|([1-9][0-9]*))/, "Number"],
+			[/;;.*/, "Comment"],
+		],
+	},
+});
+
+Monaco.languages.registerHoverProvider("Sigma16", {
+	provideHover: function (Model, Position) {
+    const Instruction = Model.getWordAtPosition(Position).word;
+    console.log(Instruction);
+    if(InstructionDocs.has(Instruction)){
+      return {
+        "contents": InstructionDocs.get(Instruction).map(value => ({value}))
+      };
+    } else return {};
+	},
+});
+
 //https://bitwiser.in/monaco-themes/
 Monaco.editor.defineTheme("Test", {
   "base": "vs-dark",
@@ -13,32 +137,32 @@ Monaco.editor.defineTheme("Test", {
       "token": ""
     },
     {
-      "foreground": "aeaeae",
-      "token": "comment"
+      "foreground": "a4db00",
+      "token": "Instruction"
     },
     {
-      "foreground": "d8fa3c",
-      "token": "constant"
+      "foreground": "2596be",
+      "token": "Label"
     },
     {
-      "foreground": "ff6400",
-      "token": "entity"
+      "foreground": "179fff",
+      "token": "Register"
+    },
+    {
+      "foreground": "db0000",
+      "token": "BadRegister"
     },
     {
       "foreground": "fbde2d",
-      "token": "keyword"
+      "token": "Bracket"
     },
     {
-      "foreground": "fbde2d",
-      "token": "storage"
+      "foreground": "00dbdb",
+      "token": "Number"
     },
     {
-      "foreground": "61ce3c",
-      "token": "string"
-    },
-    {
-      "foreground": "61ce3c",
-      "token": "meta.verbatim"
+      "foreground": "afafaf",
+      "token": "Comment"
     },
     {
       "foreground": "8da6ce",
@@ -138,6 +262,9 @@ Monaco.editor.defineTheme("Test", {
   }
 });
 
+
+//https://stackoverflow.com/questions/73581314/add-line-bookmarks-to-monaco-editor
+
 export default class EditorTab extends Tab{
   constructor(Button, Body){
     super(Button, Body);
@@ -149,9 +276,10 @@ export default class EditorTab extends Tab{
       jump 2
       `,
       "theme": "Test",
-      //"language": "javascript",
+      "language": "Sigma16",
       "automaticLayout": true,
       "fontSize": 18,
+      "glyphMargin": true,
       "background": "#4f4f4fbf"
       ////https://stackoverflow.com/a/65222640
       //"lineNumbers": a => a - 4 + "",
@@ -159,6 +287,18 @@ export default class EditorTab extends Tab{
       //"glyphMargin": false,
       //"readOnly": true
     });
+
+    /*this.Decorations = this.Editor.createDecorationsCollection([
+      {
+        range: new Monaco.Range(3, 1, 3, 1),
+        options: {
+          isWholeLine: true,
+          className: "myContentClass",
+          glyphMarginClassName: "myGlyphMarginClass",
+        },
+      },
+    ]);*/
+
     console.log(this.Editor);
 
     document.addEventListener("keydown", function(Event){
