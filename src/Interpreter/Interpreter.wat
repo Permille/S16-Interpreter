@@ -3,6 +3,8 @@
   (global $InstructionAddress (export "InstructionAddress") (mut i32) (i32.const 0))
   (global $ErrorState (export "ErrorState") (mut i32) (i32.const 0))
   (global $InstructionsExecuted (export "InstructionsExecuted") (mut i32) (i32.const 0))
+
+  (func $GetInstructionAddress (export "GetInstructionAddress") (result i32) global.get $InstructionAddress i32.const 1 i32.shr_u)
   
   (func $GetRegister (export "GetRegister") (param $RegisterID i32) (result i32)
     ;;local.get $RegisterID
@@ -37,7 +39,7 @@
     global.set $InstructionsExecuted
 
     loop
-      i32.const 5
+      i32.const 0
       local.get $i
       call $SetRegister
 
@@ -49,6 +51,10 @@
       i32.lt_s
       br_if 0
     end
+    i32.const 65536
+    i32.const 0
+    i32.const 131072
+    memory.fill
   )
   (func (export "Run") (param $MaxIterations i32) (result i32)
     (local $b i32)

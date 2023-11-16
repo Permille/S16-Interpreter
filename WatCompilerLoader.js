@@ -83,6 +83,7 @@ module.exports = function(RawContents, Map, Meta){
       const Binaryen = (await import("binaryen")).default;
       
       const BinaryenModule = Binaryen.readBinary(new Uint8Array(Module.toBinary({}).buffer));
+      BinaryenModule.setFeatures(Binaryen.Features.BulkMemory);
       Binaryen.setOptimizeLevel(3);
       Binaryen.setLowMemoryUnused(true);
       Binaryen.setAlwaysInlineMaxSize(512);
