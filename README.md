@@ -14,6 +14,8 @@ This project uses node.js and the npm package manager. Optionally, for recompili
 
 ## How to build
 
+To setup the node libraries, when first running the project, it is necessary to run the command `npm i`.
+
 ### Development
 
 For development, use the command `npm run server`. This creates a development server from which the compiled project can be loaded, and the project recompiles automatically after code save (similar to `nodemon`).
