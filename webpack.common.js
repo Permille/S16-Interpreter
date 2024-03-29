@@ -40,6 +40,10 @@ module.exports = {
         "use": ["WatCompilerLoader"]
       },
       {
+        "test": /\.wasm$/i,
+        "use": ["arraybuffer-loader"]
+      },
+      {
         "resourceQuery": /file/i,
         "type": 'asset/resource',
       },

@@ -1,0 +1,133 @@
+#StateTab > h1{
+  margin-block: 7px;
+  text-align: center;
+}
+
+.RegistersList{
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1px;
+}
+.RegistersList > div{
+  display: flex;
+}
+.RegistersList > div > div{
+  flex-grow: 1;
+  min-width: 50px;
+  border: 2px solid #3f3f3f;
+  margin: -1px;
+}
+.RegistersList.Is32Bit > div > div{
+  flex-grow: 1;
+  min-width: 90px;
+  border: 2px solid #3f3f3f;
+  margin: -1px;
+}
+
+.RegistersList > div > div > p:first-child{
+  background-color: #1f1f1f;
+  border-bottom: 2px solid #3f3f3f;
+}
+.RegistersList > div > div > p{
+  margin: 0;
+  text-align: center;
+}
+
+
+
+
+
+.MemoryView {
+  margin: auto;
+}
+.MemoryView > h1 {
+  text-align: center;
+}
+.MemoryView > .Content > div{
+  display: flex;
+  justify-content: center;
+}
+.MemoryView > .Content > div > p{
+  margin-block: 0;
+  margin-inline: 5px;
+  text-align: center;
+}
+.MemoryView > .Content > div > p + p{
+  cursor: pointer;
+}
+.MemoryView > .Content > div > p + p:hover{
+  outline: 2px solid rgb(53, 154, 255);
+  outline-offset: 1px;
+  filter: brightness(.85);
+}
+.MemoryView > .Content > div > p.Selected{
+  color: rgb(53, 154, 255);
+}
+.MemoryView > .Content > div > p:nth-child(4n + 1){
+  margin-right: 15px;
+}
+.MemoryView > .Content > div > p:first-child{
+  font-weight: bold;
+  color: #afafaf;
+}
+
+
+.MemoryView > .OffsetWrapper{
+  display: flex;
+  justify-content: center;
+  padding-block: 5px;
+}
+
+.MemoryView > .OffsetWrapper > *{
+  border: 2px solid #3f3f3f;
+  padding: 3px;
+}
+.MemoryView > .OffsetWrapper > * + *{
+  margin-left: -2px;
+}
+
+.MemoryView > .OffsetWrapper > input{
+  width: 50px;
+  text-align: center;
+  appearance: none;
+  outline: none;
+  color: white;
+}
+.MemoryView.Is32Bit > .OffsetWrapper > input{
+  width: 75px;
+}
+.MemoryView > .OffsetWrapper > input:focus{
+  border: 2px solid #bfbfbf;
+  position: relative;
+  z-index: 1;
+}
+
+.MemoryView > .OffsetWrapper > input:valid{
+  background-color: #1f1f1f;
+}
+.MemoryView > .OffsetWrapper > input:invalid{
+  background-color: #3f0000;
+}
+
+.MemoryView > .OffsetWrapper > span{
+  text-align: center;
+  
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+
+  background-color: #2f2f2f;
+
+  width: 20px;
+}
+
+.MemoryView > .OffsetWrapper > span:hover{
+  background-color: #3f3f3f;
+}
+
+.MemoryView > .OffsetWrapper > span:active{
+  background-color: #4f4f4f;
+}

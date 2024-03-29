@@ -38,6 +38,28 @@ export default class WindowFrame{
     this.ResizeDirection = [0, 0];
 
     this.EventIDs = [
+      AddEventListener(this.Element, "mousemove", function(Event){
+        if(this.Resizing || this.Dragging) return;
+        const Rect = this.Element.getBoundingClientRect();
+        const X = Event.clientX - 8 - Rect.left;
+        const Y = Event.clientY - 8 - Rect.top;
+        const SideX = X < 0 ? 15 : X > this.Element.clientWidth - 16 ? 1 : 0;
+        const SideY = Y < 0 ? 15 : Y >= this.Element.clientHeight - 16 ? 1 : 0;
+        switch(SideY << 4 | SideX){
+          case 0xf0: this.Element.style.cursor = "n-resize"; break;
+          case 0xf1: this.Element.style.cursor = "ne-resize"; break;
+          case 0x01: this.Element.style.cursor = "e-resize"; break;
+          case 0x11: this.Element.style.cursor = "se-resize"; break;
+          case 0x10: this.Element.style.cursor = "s-resize"; break;
+          case 0x1f: this.Element.style.cursor = "sw-resize"; break;
+          case 0x0f: this.Element.style.cursor = "w-resize"; break;
+          case 0xff: this.Element.style.cursor = "nw-resize"; break;
+          default: this.Element.style.cursor = "unset"; break;
+        }
+      }.bind(this)),
+      AddEventListener(this.Element, "mouseleave", function(Event){
+        this.Element.style.cursor = "unset";
+      }.bind(this)),
       AddEventListener(this.TitleBarElement, "mousedown", function(Event){
         Event.preventDefault();
         this.Dragging = true;

@@ -13,6 +13,7 @@ main{
   flex-grow: 1;
   flex-shrink: 1;
   flex-basis: auto;
+  position: relative;
 }
 footer{
   flex-grow: 0;
@@ -23,28 +24,14 @@ footer{
   justify-content: center;
   gap: 10px;
 }
+h1{
+  font-weight: normal;
+}
+/* https://stackoverflow.com/a/71876526 */
+.monaco-editor{
+  position: absolute !important;
+}
 
-.Grid{
-  display: grid;
-  grid-template-rows: 1fr 10px 1fr;
-  grid-template-columns: 1fr 10px 1fr;
-  width: 100%;
-  height: 100%;
-}
-.GutterColumn{
-  grid-row: 1/-1;
-  cursor: col-resize;
-}
-#GutterColumn1{
-  grid-column: 2;
-}
-.GutterRow{
-  grid-column: 1/-1;
-  cursor: row-resize;
-}
-#GutterRow1{
-  grid-row: 2;
-}
-#GutterColumn1, #GutterRow1{
-  background-color: #2f2f2f;
+td + td{
+  text-align: right;
 }

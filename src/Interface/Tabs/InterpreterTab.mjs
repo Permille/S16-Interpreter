@@ -1,84 +1,110 @@
 import "./InterpreterTab.css";
 import Tab from "./Tab.mjs";
-import MemoryViewer from "../MemoryViewer.mjs";
+import Disassembly from "../Disassembly.mjs";
+import AdvancedSettingsWindow from "../Windows/AdvancedSettingsWindow.mjs";
 
 export default class InterpreterTab extends Tab{
   constructor(Button, Body){
     super(Button, Body);
     this.IsRunning = false;
+    this.YieldInterval = 1000000;
     this.CompileButton = this.Body.querySelector(".CompileButton");
-    this.ResetButton = this.Body.querySelector(".ResetButton");
+    //this.ResetButton = this.Body.querySelector(".ResetButton");
     this.RunButton = this.Body.querySelector(".RunButton");
     this.StepButton = this.Body.querySelector(".StepButton");
-    this.CompileButton.addEventListener("click", function(){
-      window.Main.Interpreter.Compile(window.Main.Interface.Tabs.get("Editor").GetText());
-    }.bind(this));
-    this.ResetButton.addEventListener("click", async function(){
+    this.AdvancedSettingsButton = this.Body.querySelector(".AdvancedSettingsButton");
+
+    this.StateElement = document.getElementById("InterpreterStateSummaryState");
+    this.ProgramCounterElement = document.getElementById("InterpreterStateSummaryProgramCounter");
+    this.InstructionsRunElement = document.getElementById("InterpreterStateSummaryInstructionsRun");
+    this.InterpreterOutputElement = document.getElementById("InterpreterOutput");
+    this.InterpreterInputElement = document.getElementById("InterpreterInput");
+
+    this.CompileButton.addEventListener("click", async function(){
+      this.StateElement.innerText = "Resetting";
       await window.Main.Interpreter.Reset();
+      this.RunButton.classList.remove("NotClickable");
+      this.StepButton.classList.remove("NotClickable");
+      this.InterpreterOutputElement.innerText = ""; //Clear output buffer
+      //The original implementation does not clear the input buffer...
+      this.StateElement.innerText = "Stopped";
+      window.Main.Interpreter.Compile(window.Main.Interface.Tabs.get("Editor").GetText());
+      this.Disassembly.TriggerUpdate();
     }.bind(this));
+    /*this.ResetButton.addEventListener("click", async function(){
+      await window.Main.Interpreter.Reset();
+    }.bind(this));*/
     this.RunButton.addEventListener("click", async function(){
       if(!this.IsRunning){
         this.IsRunning = true;
+        this.StateElement.innerText = "Running";
         this.RunButton.innerText = "Stop";
-        await window.Main.Interpreter.Run(1000000);
+        this.Disassembly.ReplaceContents(";; Disassembly cannot be shown\n;; because the program is running.");
+        await window.Main.Interpreter.Run(this.YieldInterval);
       } else{
         this.IsRunning = false;
+        this.StateElement.innerText = "Stopped";
         this.RunButton.innerText = "Run";
+        this.Disassembly.TriggerUpdate();
       }
     }.bind(this));
     this.StepButton.addEventListener("click", async function(){
       await window.Main.Interpreter.Run(1);
+      this.Disassembly.TriggerUpdate();
+    }.bind(this));
+    this.AdvancedSettingsButton.addEventListener("click", function(){
+      new AdvancedSettingsWindow;
     }.bind(this));
     
     void async function Load(){
       await window.LoadedPromise;
       window.Main.Interpreter.Events.addEventListener("Yield", function(){
-        if(this.IsRunning) window.Main.Interpreter.Run(1000000);
+        if(this.IsRunning) window.Main.Interpreter.Run(this.YieldInterval);
       }.bind(this));
       window.Main.Interpreter.Events.addEventListener("Error", function(){
         this.IsRunning = false;
+        this.StateElement.innerText = "Errored";
         this.RunButton.innerText = "Run";
+        this.RunButton.classList.add("NotClickable");
+        this.StepButton.classList.add("NotClickable");
       }.bind(this));
-      window.Main.Interpreter.Events.addEventListener("Stop", console.log.bind(null, "Stopped"));
-      window.Main.Interpreter.Events.addEventListener("Breakpoint", console.log.bind(null, "Reached Breakpoint"));
-    }.call(this);
+      window.Main.Interpreter.Events.addEventListener("Stop", function(){
+        this.StateElement.innerText = "Exited";
+        this.RunButton.innerText = "Run";
+        this.RunButton.classList.add("NotClickable");
+        this.StepButton.classList.add("NotClickable");
+        this.IsRunning = false;
+        this.Disassembly.TriggerUpdate();
+      }.bind(this));
+      window.Main.Interpreter.Events.addEventListener("Breakpoint", function(){
+        this.StateElement.innerText = "Breakpoint";
+        this.RunButton.innerText = "Run";
+        this.IsRunning = false;
+        this.Disassembly.TriggerUpdate();
+      }.bind(this));
 
-    this.RegisterValueElements = [];
-    const RegistersWrapperElement = this.Body.querySelector(".RegistersList");
-    for(let i = 0; i < 2; ++i){
-      const HalfElement = document.createElement("div");
-      RegistersWrapperElement.append(HalfElement);
-      for(let j = i * 8; j < i * 8 + 8; ++j){
-        const RegisterElement = document.createElement("div");
-        HalfElement.append(RegisterElement);
-        const RegisterIDElement = document.createElement("p");
-        const RegisterValueElement = document.createElement("p");
-        RegisterIDElement.innerText = "R" + j;
-        RegisterValueElement.innerText = Math.floor(Math.random() * 65535 - 32768);
-        RegisterElement.append(RegisterIDElement);
-        RegisterElement.append(RegisterValueElement);
-        this.RegisterValueElements.push(RegisterValueElement);
-      }
-    }
-    this.MemoryViewer = new MemoryViewer(this.Body.querySelector(".MemoryView"));
-
+      window.Main.Interpreter.Events.addEventListener("Output", function(Message){
+        this.InterpreterOutputElement.innerText += Message.detail;
+      }.bind(this));
     
-    this.ReceivedMemoryUpdate = false;
+      void async function Frame(){
+        const State = await window.Main.Interpreter.MessageWorker("GetStateSummary");
+
+        this.ProgramCounterElement.innerText = State.data.ProgramCounter;
+        this.InstructionsRunElement.innerText = State.data.InstructionsRun;
+
+        window.requestAnimationFrame(Frame.bind(this));
+      }.call(this);
+    }.call(this);
+
+    this.Disassembly = new Disassembly(this.Body.querySelector(".Disassembly"));
 
     void async function Load(){
       await window.LoadedPromise;
-      const Response = await window.Main.Interpreter.MessageWorker("GetMemoryArray", {
-        "Min": this.MemoryViewer.MemoryMin + 0,
-        "Max": this.MemoryViewer.MemoryMin + 160
-      });
-      this.MemoryViewer.UpdateMemory(Response.data.MemoryArray);
-      window.setTimeout(Load.bind(this), 20);
+      this.Disassembly.TriggerUpdate();
     }.call(this);
-    void async function Load(){
-      await window.LoadedPromise;
-      const Response = await window.Main.Interpreter.MessageWorker("GetRegisters");
-      for(let i = 0; i < 16; ++i) this.RegisterValueElements[i].innerText = Response.data.Registers[i];
-      window.setTimeout(Load.bind(this), 20);
-    }.call(this);
+  }
+  SetInputBuffer(Value){
+    if(Value !== this.InterpreterInputElement.value) this.InterpreterInputElement.value = Value;
   }
 };

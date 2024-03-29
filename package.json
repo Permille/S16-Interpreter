@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "arraybuffer-loader": "^1.0.8",
+    "binary-loader": "^0.0.1",
     "binaryen": "^114.0.0",
     "css-loader": "^6.8.1",
     "express": "^4.18.2",
@@ -9,6 +11,7 @@
     "path": "^0.12.7",
     "split-grid": "^1.0.11",
     "style-loader": "^3.3.3",
+    "url-loader": "^4.1.1",
     "wabt": "^1.0.32",
     "webpack": "^5.88.2",
     "webpack-merge": "^5.9.0"

@@ -18,17 +18,24 @@ export default class Tab{
       if(!this.IsMouseDown) return;
       this.IsMouseDown = false;
       if(Event.clientY < 25) return;
-      if(this.Button.classList.contains("Active")) return;
+      if(this.Button.classList.contains("Active")){
+        this.Button.classList.remove("Active");
+      }
       console.log(Event);
       const Window = new WindowFrame(500, 200);
       Window.SetTitle(this.Button.innerText);
       Window.SetPosition(Event.clientX - Window.Width / 2., Event.clientY);
       this.Button.style.display = "none";
-      const OldParentElement = this.Body.parentElement;
       Window.BodyElement.appendChild(this.Body);
       Window.Dragging = true;
       AddEventListener(Window.Events, "Close", function(Event){
-        OldParentElement.appendChild(this.Body);
+        //Add element to main body only if no other tab is being shown
+        if(document.querySelector("main > div") !== null){
+          document.getElementById("UnusedTabs").appendChild(this.Body);
+        } else{
+          document.querySelector("main").appendChild(this.Body);
+          this.Button.classList.add("Active");
+        }
         this.Button.style.display = "block";
       }.bind(this));
     }.bind(this));

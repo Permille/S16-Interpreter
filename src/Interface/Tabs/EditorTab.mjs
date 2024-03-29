@@ -2,6 +2,8 @@ import "./EditorTab.css";
 import Tab from "./Tab.mjs";
 import * as Monaco from "monaco-editor/esm/vs/editor/editor.api.js";
 import Split from "split-grid";
+import HexLineNumbers from "../HexLineNumbers.mjs";
+import Decompile from "../../Interpreter/Decompile.mjs";
 
 const InstructionDocs = new Map([
   ["add", [
@@ -78,12 +80,12 @@ const InstructionDocs = new Map([
   ["jumpc0", [
     "`jumpc0`: Jump Conditionally if Zero",
     "Jumps to the effective address only if the provided bit of R15 is set to zero.",
-    "Syntax: `lea Bit,Offset[Ra]`"
+    "Syntax: `jumpc0 Bit,Offset[Ra]`"
   ]],
   ["jumpc1", [
     "`jumpc1`: Jump Conditionally if One",
     "Jumps to the effective address only if the provided bit of R15 is set to one.",
-    "Syntax: `lea Bit,Offset[Ra]`"
+    "Syntax: `jumpc1 Bit,Offset[Ra]`"
   ]],
   ["jal", [
     "`jal`: Jump And Link",
@@ -109,15 +111,15 @@ Monaco.languages.setMonarchTokensProvider("Sigma16", {
 			[/R((0[0-9]+)|([1-9][0-9][0-9]+)|(1[6-9])|([2-9][0-9]))/, "BadRegister"],
 			[/R((1[0-5]?)|[02-9])/, "Register"],
 			[/[\[\]]/, "Bracket"],
-			[/-?(0|([1-9][0-9]*))/, "Number"],
-			[/;;.*/, "Comment"],
+			[/(-?(0|([1-9][0-9]*)))|(\$[0-9a-fA-F]+)/, "Number"],
+			[/;.*/, "Comment"],
 		],
 	},
 });
 
 Monaco.languages.registerHoverProvider("Sigma16", {
 	provideHover: function (Model, Position) {
-    const Instruction = Model.getWordAtPosition(Position).word;
+    const Instruction = Model.getWordAtPosition(Position)?.word;
     console.log(Instruction);
     if(InstructionDocs.has(Instruction)){
       return {
@@ -163,93 +165,6 @@ Monaco.editor.defineTheme("Test", {
     {
       "foreground": "afafaf",
       "token": "Comment"
-    },
-    {
-      "foreground": "8da6ce",
-      "token": "support"
-    },
-    {
-      "foreground": "ab2a1d",
-      "fontStyle": "italic",
-      "token": "invalid.deprecated"
-    },
-    {
-      "foreground": "f8f8f8",
-      "background": "9d1e15",
-      "token": "invalid.illegal"
-    },
-    {
-      "foreground": "ff6400",
-      "fontStyle": "italic",
-      "token": "entity.other.inherited-class"
-    },
-    {
-      "foreground": "ff6400",
-      "token": "string constant.other.placeholder"
-    },
-    {
-      "foreground": "becde6",
-      "token": "meta.function-call.py"
-    },
-    {
-      "foreground": "7f90aa",
-      "token": "meta.tag"
-    },
-    {
-      "foreground": "7f90aa",
-      "token": "meta.tag entity"
-    },
-    {
-      "foreground": "ffffff",
-      "token": "entity.name.section"
-    },
-    {
-      "foreground": "d5e0f3",
-      "token": "keyword.type.variant"
-    },
-    {
-      "foreground": "f8f8f8",
-      "token": "source.ocaml keyword.operator.symbol"
-    },
-    {
-      "foreground": "8da6ce",
-      "token": "source.ocaml keyword.operator.symbol.infix"
-    },
-    {
-      "foreground": "8da6ce",
-      "token": "source.ocaml keyword.operator.symbol.prefix"
-    },
-    {
-      "fontStyle": "underline",
-      "token": "source.ocaml keyword.operator.symbol.infix.floating-point"
-    },
-    {
-      "fontStyle": "underline",
-      "token": "source.ocaml keyword.operator.symbol.prefix.floating-point"
-    },
-    {
-      "fontStyle": "underline",
-      "token": "source.ocaml constant.numeric.floating-point"
-    },
-    {
-      "background": "ffffff08",
-      "token": "text.tex.latex meta.function.environment"
-    },
-    {
-      "background": "7a96fa08",
-      "token": "text.tex.latex meta.function.environment meta.function.environment"
-    },
-    {
-      "foreground": "fbde2d",
-      "token": "text.tex.latex support.function"
-    },
-    {
-      "foreground": "ffffff",
-      "token": "source.plist string.unquoted"
-    },
-    {
-      "foreground": "ffffff",
-      "token": "source.plist keyword.operator"
     }
   ],
   "colors": {
@@ -265,41 +180,71 @@ Monaco.editor.defineTheme("Test", {
 
 //https://stackoverflow.com/questions/73581314/add-line-bookmarks-to-monaco-editor
 
+//Add:   9992000000 / 84228862
+//Sub:  10584000000 / 84529669
+//Mul:  19869000000 / 83663824
+//Div:   8805000000 / 77816196
+//Cmp:  14264000000 / 77893285
+//Addc: 10220000000 / 84763490
+//Muln: 21255000000 / 82127778
+//Jump: 12085000000 / 68068057
+//Lea:  14215000000 / 65743919
+//Load: 14069000000 / 66939238
+//Store:14042000000 / 63713407
 export default class EditorTab extends Tab{
   constructor(Button, Body){
     super(Button, Body);
+    this.GetHexLineNumber = HexLineNumbers(this.GetText.bind(this));
+    this.Decompile = Decompile;
     this.Editor = Monaco.editor.create(this.Body.querySelector(".Editor"), {
-      "value": `
-      lea R1,123[R2]
-      add R2,R1,R2
-      add R3,R1,R2
-      jump 2
-      `,
+      "value": `;;Test instruction
+  lea R1,123[R0]
+  add R1,R1,R1
+  add R1,R1,R1
+  add R1,R1,R1
+  add R1,R1,R1
+  add R1,R1,R1
+  add R1,R1,R1
+  add R1,R1,R1
+  add R1,R1,R1
+  jump 2`,
       "theme": "Test",
       "language": "Sigma16",
       "automaticLayout": true,
       "fontSize": 18,
       "glyphMargin": true,
-      "background": "#4f4f4fbf"
+      "background": "#4f4f4fbf",
       ////https://stackoverflow.com/a/65222640
-      //"lineNumbers": a => a - 4 + "",
+      "lineNumbers": a => "0x" + this.GetHexLineNumber(a - 1).toString(16).padStart(4, "0"),
       //"lineNumbersMinChars": 2,
       //"glyphMargin": false,
       //"readOnly": true
     });
 
-    /*this.Decorations = this.Editor.createDecorationsCollection([
+    //Could be used for drawing breakpoint arrows
+        /*this.Decorations = this.Editor.createDecorationsCollection([
       {
         range: new Monaco.Range(3, 1, 3, 1),
         options: {
           isWholeLine: true,
-          className: "myContentClass",
-          glyphMarginClassName: "myGlyphMarginClass",
+          //className: "myContentClass",
+          //glyphMarginClassName: "myGlyphMarginClass",
+          //minimap: true,
+          //before: "Hello",
+          //afterContentClassName: "Test"
+          marginClassName: "Breakpoint",
+          "minimap": {
+            "color": "rgb(2, 99, 173)",
+            "darkColor": "rgb(2, 99, 173)",
+            "position": 1 //Inline
+          }
         },
       },
     ]);*/
 
-    console.log(this.Editor);
+
+    //console.log(this.Editor);
+    
 
     document.addEventListener("keydown", function(Event){
       if(Event.ctrlKey && Event.key === "s"){

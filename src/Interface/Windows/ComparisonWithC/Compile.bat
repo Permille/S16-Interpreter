@@ -1,0 +1,1 @@
+clang --target=wasm32 --no-standard-libraries -Wl,--export-all -Wl,--no-entry,--import-memory -o Main.wasm Main.c -O3
